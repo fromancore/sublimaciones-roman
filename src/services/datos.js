@@ -155,6 +155,7 @@ export const PRODUCTOS_INICIALES = [
     type: 'taza',
     colors: ['#FFFFFF'],
     popularImage: '☕',
+    image: '/Taza blanca con logo de guerrero romano (1).png',
   },
 ]
 
