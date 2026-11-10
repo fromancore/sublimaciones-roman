@@ -1,100 +1,99 @@
-import React from 'react';
-import { Shield, Palette, DollarSign, HeartHandshake, Columns } from 'lucide-react';
+import React from 'react'
+import { Shield, Palette, DollarSign, HeartHandshake, Columns } from 'lucide-react'
 
 export default function HeroSection() {
   const valuePillars = [
     {
       icon: Palette,
-      title: "Diseños Creativos",
-      desc: "Arte 100% personalizado adaptado a tu estilo único con revisión gráfica."
+      title: 'Diseños Creativos',
+      desc: 'Arte 100% personalizado adaptado a tu estilo único con revisión gráfica.',
     },
     {
       icon: Shield,
-      title: "Calidad en Sublimación",
-      desc: "Impresión HD de alta durabilidad resistente al lavado constante."
+      title: 'Calidad en Sublimación',
+      desc: 'Impresión HD de alta durabilidad resistente al lavado constante.',
     },
     {
       icon: DollarSign,
-      title: "Cotización Transparente",
-      desc: "Precios accesibles con opción del 50% de anticipo inicial."
+      title: 'Cotización Transparente',
+      desc: 'Precios accesibles con opción del 50% de anticipo inicial.',
     },
     {
       icon: HeartHandshake,
-      title: "Atención Cercana",
-      desc: "Asesoría directa por WhatsApp (937 283 0402) y aprobación previa RN-01."
-    }
-  ];
+      title: 'Atención Cercana',
+      desc: 'Asesoría directa por WhatsApp (937 283 0402) y aprobación previa RN-01.',
+    },
+  ]
 
   return (
-    <section className="relative overflow-hidden bg-roman-marble py-16 md:py-24 border-b border-roman-platinum">
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
-        
+    <section className="relative overflow-hidden border-b border-roman-platinum bg-roman-marble py-16 md:py-24">
+      <div className="relative z-10 mx-auto max-w-7xl space-y-16 px-4 sm:px-6 lg:px-8">
         {/* Main Hero Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           {/* Left Column */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            
+          <div className="space-y-6 text-center lg:col-span-7 lg:text-left">
             {/* Monumental Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-cinzel font-black tracking-tight text-roman-dark leading-tight">
+            <h1 className="font-cinzel text-3xl font-black leading-tight tracking-tight text-roman-dark sm:text-4xl lg:text-5xl">
               Fuerza, Elegancia y <br />
-              <span className="text-roman-bronze border-b-2 border-roman-bronze/40 pb-1 inline-block">
+              <span className="inline-block border-b-2 border-roman-bronze/40 pb-1 text-roman-bronze">
                 Calidad Artesanal
               </span>
             </h1>
 
             {/* Slogan */}
             <div className="py-1">
-              <p className="text-base sm:text-lg text-slate-700 font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0 font-body">
-                "Transformamos ideas y momentos especiales en productos personalizados, creativos y accesibles."
+              <p className="mx-auto max-w-2xl font-body text-base font-medium leading-relaxed text-slate-700 sm:text-lg lg:mx-0">
+                "Transformamos ideas y momentos especiales en productos personalizados, creativos y
+                accesibles."
               </p>
             </div>
 
             {/* Stats */}
-            <div className="pt-4 grid grid-cols-3 gap-4 border-t border-slate-300/80 max-w-lg mx-auto lg:mx-0">
+            <div className="mx-auto grid max-w-lg grid-cols-3 gap-4 border-t border-slate-300/80 pt-4 lg:mx-0">
               <div className="text-center lg:text-left">
-                <p className="text-2xl font-cinzel font-black text-roman-navy">+5,000</p>
-                <p className="text-[11px] text-slate-500 font-bold uppercase">Entregas Exitosas</p>
+                <p className="font-cinzel text-2xl font-black text-roman-navy">+5,000</p>
+                <p className="text-[11px] font-bold uppercase text-slate-500">Entregas Exitosas</p>
               </div>
-              <div className="text-center lg:text-left border-x border-slate-300 px-3">
-                <p className="text-2xl font-cinzel font-black text-roman-bronze">100%</p>
-                <p className="text-[11px] text-slate-500 font-bold uppercase">Garantía RN-01</p>
+              <div className="border-x border-slate-300 px-3 text-center lg:text-left">
+                <p className="font-cinzel text-2xl font-black text-roman-bronze">100%</p>
+                <p className="text-[11px] font-bold uppercase text-slate-500">Garantía RN-01</p>
               </div>
               <div className="text-center lg:text-left">
-                <p className="text-xl sm:text-2xl font-cinzel font-black text-slate-700">48 - 72 hrs</p>
-                <p className="text-[10px] sm:text-[11px] text-slate-500 font-bold uppercase leading-tight">dependiendo el producto</p>
+                <p className="font-cinzel text-xl font-black text-slate-700 sm:text-2xl">
+                  48 - 72 hrs
+                </p>
+                <p className="text-[10px] font-bold uppercase leading-tight text-slate-500 sm:text-[11px]">
+                  dependiendo el producto
+                </p>
               </div>
             </div>
-
           </div>
 
           {/* Right Column */}
-          <div className="lg:col-span-5 relative">
+          <div className="relative lg:col-span-5">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              
-              <div className="card-architectural p-6 border-2 border-roman-bronze/30 space-y-6 shadow-card-marble">
-                
+              <div className="card-architectural space-y-6 border-2 border-roman-bronze/30 p-6 shadow-card-marble">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                   <div className="flex items-center gap-2">
-                    <Columns className="w-4 h-4 text-roman-bronze" />
-                    <span className="font-cinzel font-bold text-xs text-roman-navy uppercase tracking-wider">
+                    <Columns className="h-4 w-4 text-roman-bronze" />
+                    <span className="font-cinzel text-xs font-bold uppercase tracking-wider text-roman-navy">
                       Muestra de Sublimación
                     </span>
                   </div>
-                  <span className="px-2.5 py-1 rounded bg-roman-stone text-roman-navy font-mono text-[10px] font-bold border border-slate-300">
+                  <span className="rounded border border-slate-300 bg-roman-stone px-2.5 py-1 font-mono text-[10px] font-bold text-roman-navy">
                     Cárdenas, TAB
                   </span>
                 </div>
 
-                <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-slate-900 to-roman-navy p-6 flex flex-col items-center justify-center min-h-[260px] shadow-inner">
-                  
-                  <div className="relative w-40 h-40 flex items-center justify-center">
-                    <div className="w-32 h-36 bg-gradient-to-tr from-slate-100 via-white to-slate-200 rounded-r-3xl rounded-l-md shadow-2xl border-4 border-roman-navy flex flex-col items-center justify-center p-3 text-center">
-                      <div className="w-full h-full rounded-lg bg-roman-navy flex flex-col items-center justify-center p-2 border border-roman-gold/60">
+                <div className="relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-900 to-roman-navy p-6 shadow-inner">
+                  <div className="relative flex h-40 w-40 items-center justify-center">
+                    <div className="flex h-36 w-32 flex-col items-center justify-center rounded-l-md rounded-r-3xl border-4 border-roman-navy bg-gradient-to-tr from-slate-100 via-white to-slate-200 p-3 text-center shadow-2xl">
+                      <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-roman-gold/60 bg-roman-navy p-2">
                         <span className="text-2xl">🏛️</span>
-                        <p className="text-[9px] font-cinzel font-bold text-roman-gold tracking-widest mt-1">SUBLIMACIONES ROMÁN</p>
-                        <p className="text-[7px] text-slate-300 uppercase">Tu Arte Aquí</p>
+                        <p className="mt-1 font-cinzel text-[9px] font-bold tracking-widest text-roman-gold">
+                          SUBLIMACIONES ROMÁN
+                        </p>
+                        <p className="text-[7px] uppercase text-slate-300">Tu Arte Aquí</p>
                       </div>
                     </div>
                   </div>
@@ -104,40 +103,39 @@ export default function HeroSection() {
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-roman-stone border border-roman-bronze/40 text-xs text-slate-700 flex items-center gap-3">
+                <div className="flex items-center gap-3 rounded-xl border border-roman-bronze/40 bg-roman-stone p-3 text-xs text-slate-700">
                   <span className="text-lg">🛡️</span>
                   <p className="text-[11px] leading-tight">
-                    <strong className="text-roman-navy font-bold">Regla RN-01:</strong> Recibes una prueba visual digital exacta para aprobar antes de imprimir.
+                    <strong className="font-bold text-roman-navy">Regla RN-01:</strong> Recibes una
+                    prueba visual digital exacta para aprobar antes de imprimir.
                   </p>
                 </div>
-
               </div>
-
             </div>
           </div>
-
         </div>
 
         {/* Pillars Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+        <div className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-2 lg:grid-cols-4">
           {valuePillars.map((pillar, idx) => {
-            const Icon = pillar.icon;
+            const Icon = pillar.icon
             return (
-              <div 
+              <div
                 key={idx}
-                className="card-architectural p-6 border border-slate-200/90 hover:border-roman-bronze/60 transition-all duration-300 shadow-card-marble hover:-translate-y-1 space-y-3"
+                className="card-architectural space-y-3 border border-slate-200/90 p-6 shadow-card-marble transition-all duration-300 hover:-translate-y-1 hover:border-roman-bronze/60"
               >
-                <div className="w-10 h-10 rounded-xl bg-roman-navy flex items-center justify-center text-roman-gold shadow-md">
-                  <Icon className="w-5 h-5" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-roman-navy text-roman-gold shadow-md">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-cinzel font-bold text-sm text-roman-navy uppercase">{pillar.title}</h3>
-                <p className="text-xs text-slate-600 font-normal leading-relaxed">{pillar.desc}</p>
+                <h3 className="font-cinzel text-sm font-bold uppercase text-roman-navy">
+                  {pillar.title}
+                </h3>
+                <p className="text-xs font-normal leading-relaxed text-slate-600">{pillar.desc}</p>
               </div>
-            );
+            )
           })}
         </div>
-
       </div>
     </section>
-  );
+  )
 }

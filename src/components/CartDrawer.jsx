@@ -1,151 +1,179 @@
-import React from 'react';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Columns } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import React from 'react'
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Columns } from 'lucide-react'
+import confetti from 'canvas-confetti'
 
 export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, onCheckout }) {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + item.totalPrice, 0)
 
   const handleCheckoutSubmit = () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0) return
 
     confetti({
       particleCount: 120,
       spread: 80,
-      origin: { y: 0.5 }
-    });
+      origin: { y: 0.5 },
+    })
 
-    onCheckout(cartItems, subtotal);
-    onClose();
-  };
+    onCheckout(cartItems, subtotal)
+    onClose()
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-roman-navy/70 backdrop-blur-sm animate-fadeIn">
-      <div className="absolute inset-0" onClick={onClose}></div>
+    <div className="animate-fadeIn fixed inset-0 z-50 overflow-hidden bg-roman-navy/70 backdrop-blur-sm">
+      <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white border-l-2 border-roman-bronze shadow-2xl flex flex-col">
-          
+      <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
+        <div className="flex w-screen max-w-md flex-col border-l-2 border-roman-bronze bg-white shadow-2xl">
           {/* Header */}
-          <div className="px-6 py-5 bg-roman-navy text-white border-b border-roman-bronze/40 flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-roman-bronze/40 bg-roman-navy px-6 py-5 text-white">
             <div className="flex items-center gap-3">
-              <ShoppingBag className="w-5 h-5 text-roman-gold" />
-              <h2 className="font-cinzel font-bold text-lg">Carrito de Compras</h2>
-              <span className="px-2 py-0.5 text-xs font-bold rounded bg-roman-gold text-roman-navy">
+              <ShoppingBag className="h-5 w-5 text-roman-gold" />
+              <h2 className="font-cinzel text-lg font-bold">Carrito de Compras</h2>
+              <span className="rounded bg-roman-gold px-2 py-0.5 text-xs font-bold text-roman-navy">
                 {cartItems.length}
               </span>
             </div>
 
-            <button onClick={onClose} className="text-slate-300 hover:text-white p-1">
-              <X className="w-6 h-6" />
+            <button onClick={onClose} className="p-1 text-slate-300 hover:text-white">
+              <X className="h-6 w-6" />
             </button>
           </div>
 
           {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-roman-stone/40">
+          <div className="flex-1 space-y-4 overflow-y-auto bg-roman-stone/40 p-6">
             {cartItems.length === 0 ? (
-              <div className="text-center py-20 space-y-4">
-                <ShoppingBag className="w-12 h-12 text-slate-400 mx-auto" />
-                <p className="text-slate-600 text-sm font-semibold">Tu carrito de compras está vacío.</p>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                  Explora nuestro catálogo y personaliza tazas, termos o playeras con la calidad Sublimaciones Román.
+              <div className="space-y-4 py-20 text-center">
+                <ShoppingBag className="mx-auto h-12 w-12 text-slate-400" />
+                <p className="text-sm font-semibold text-slate-600">
+                  Tu carrito de compras está vacío.
+                </p>
+                <p className="mx-auto max-w-xs text-xs text-slate-500">
+                  Explora nuestro catálogo y personaliza tazas, termos o playeras con la calidad
+                  Sublimaciones Román.
                 </p>
               </div>
             ) : (
               cartItems.map((item, idx) => {
-                const totalBase = (item.basePrice || item.finalUnitPrice || 0) * item.quantity;
-                const discountAmount = Math.max(0, totalBase - item.totalPrice);
-                const discountPercent = totalBase > 0 ? Math.round((discountAmount / totalBase) * 100) : 0;
+                const totalBase = (item.basePrice || item.finalUnitPrice || 0) * item.quantity
+                const discountAmount = Math.max(0, totalBase - item.totalPrice)
+                const discountPercent =
+                  totalBase > 0 ? Math.round((discountAmount / totalBase) * 100) : 0
 
                 return (
-                  <div key={idx} className="card-architectural p-4 space-y-3 relative border border-slate-300">
+                  <div
+                    key={idx}
+                    className="card-architectural relative space-y-3 border border-slate-300 p-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-cinzel font-bold text-sm text-roman-navy">{item.name}</h3>
-                        <p className="text-[11px] text-roman-bronze font-semibold">
-                          Cant: {item.quantity} pza {item.selectedSize ? `• Talla: ${item.selectedSize}` : ''}
+                        <h3 className="font-cinzel text-sm font-bold text-roman-navy">
+                          {item.name}
+                        </h3>
+                        <p className="text-[11px] font-semibold text-roman-bronze">
+                          Cant: {item.quantity} pza{' '}
+                          {item.selectedSize ? `• Talla: ${item.selectedSize}` : ''}
                         </p>
                       </div>
 
                       <button
                         onClick={() => onRemoveItem(idx)}
-                        className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                        className="p-1 text-slate-400 transition-colors hover:text-rose-600"
                         title="Eliminar producto"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
 
                     {/* Pricing Breakdown per item */}
-                    <div className="grid grid-cols-2 gap-2 p-2 rounded bg-slate-50 border border-slate-200 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 rounded border border-slate-200 bg-slate-50 p-2 text-[11px]">
                       <div>
-                        <span className="text-slate-500 block text-[10px]">Precio Unitario:</span>
-                        <span className="font-semibold text-slate-800">${item.basePrice || item.finalUnitPrice} MXN</span>
+                        <span className="block text-[10px] text-slate-500">Precio Unitario:</span>
+                        <span className="font-semibold text-slate-800">
+                          ${item.basePrice || item.finalUnitPrice} MXN
+                        </span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[10px]">Descuento Aplicado:</span>
-                        <span className={`font-semibold ${discountAmount > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>
-                          {discountAmount > 0 ? `-$${discountAmount} MXN (${discountPercent}%)` : '$0 MXN'}
+                        <span className="block text-[10px] text-slate-500">
+                          Descuento Aplicado:
+                        </span>
+                        <span
+                          className={`font-semibold ${discountAmount > 0 ? 'text-emerald-700' : 'text-slate-400'}`}
+                        >
+                          {discountAmount > 0
+                            ? `-$${discountAmount} MXN (${discountPercent}%)`
+                            : '$0 MXN'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded bg-roman-stone text-xs space-y-1 text-slate-700 border border-slate-200">
+                    <div className="space-y-1 rounded border border-slate-200 bg-roman-stone p-2.5 text-xs text-slate-700">
                       {item.customText && (
-                        <p><strong className="text-roman-navy">Texto:</strong> "{item.customText}"</p>
+                        <p>
+                          <strong className="text-roman-navy">Texto:</strong> "{item.customText}"
+                        </p>
                       )}
                       {item.uploadedFileName && (
-                        <p><strong className="text-emerald-700">Archivo:</strong> {item.uploadedFileName}</p>
+                        <p>
+                          <strong className="text-emerald-700">Archivo:</strong>{' '}
+                          {item.uploadedFileName}
+                        </p>
                       )}
-                      <p><strong className="text-slate-500">Tiempo de producción:</strong> {item.productionTime}</p>
+                      <p>
+                        <strong className="text-slate-500">Tiempo de producción:</strong>{' '}
+                        {item.productionTime}
+                      </p>
                     </div>
 
-                    <div className="flex justify-between items-center pt-1 text-xs">
-                      <span className="text-slate-500 font-bold uppercase text-[10px]">Total Ítem:</span>
-                      <span className="font-cinzel font-black text-base text-roman-navy">${item.totalPrice} MXN</span>
+                    <div className="flex items-center justify-between pt-1 text-xs">
+                      <span className="text-[10px] font-bold uppercase text-slate-500">
+                        Total Ítem:
+                      </span>
+                      <span className="font-cinzel text-base font-black text-roman-navy">
+                        ${item.totalPrice} MXN
+                      </span>
                     </div>
                   </div>
-                );
+                )
               })
             )}
           </div>
 
           {/* Footer Summary */}
           {cartItems.length > 0 && (
-            <div className="p-6 bg-white border-t border-slate-200 space-y-4">
+            <div className="space-y-4 border-t border-slate-200 bg-white p-6">
               <div className="space-y-2 text-xs text-slate-700">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span className="font-bold text-roman-navy">${subtotal} MXN</span>
                 </div>
-                <div className="flex justify-between text-emerald-700 font-semibold">
+                <div className="flex justify-between font-semibold text-emerald-700">
                   <span>Anticipo del 50%:</span>
                   <span>${Math.round(subtotal * 0.5)} MXN</span>
                 </div>
-                <div className="flex justify-between font-cinzel font-bold text-base text-roman-navy pt-2 border-t border-slate-200">
+                <div className="flex justify-between border-t border-slate-200 pt-2 font-cinzel text-base font-bold text-roman-navy">
                   <span>Total a Pagar:</span>
-                  <span className="text-roman-bronze text-xl">${subtotal} MXN</span>
+                  <span className="text-xl text-roman-bronze">${subtotal} MXN</span>
                 </div>
               </div>
 
-              <div className="p-2.5 rounded bg-roman-stone border border-slate-300 text-[11px] text-slate-700 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-roman-navy shrink-0" />
+              <div className="flex items-center gap-2 rounded border border-slate-300 bg-roman-stone p-2.5 text-[11px] text-slate-700">
+                <ShieldCheck className="h-4 w-4 shrink-0 text-roman-navy" />
                 <span>Cumple la Regla RN-01: Recibirás una muestra previa para autorizar.</span>
               </div>
 
               <button
                 onClick={handleCheckoutSubmit}
-                className="w-full py-4 rounded-xl btn-relief-gold text-xs font-headline tracking-widest uppercase flex items-center justify-center gap-2"
+                className="btn-relief-gold flex w-full items-center justify-center gap-2 rounded-xl py-4 font-headline text-xs uppercase tracking-widest"
               >
                 <span>PROCESAR PEDIDO Y GENERAR FOLIO</span>
-                <ArrowRight className="w-4 h-4 text-roman-navy" />
+                <ArrowRight className="h-4 w-4 text-roman-navy" />
               </button>
             </div>
           )}
-
         </div>
       </div>
     </div>
-  );
+  )
 }

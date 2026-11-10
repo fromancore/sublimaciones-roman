@@ -3,19 +3,24 @@
 @tailwind utilities;
 
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cinzel', 'Montserrat', serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Cinzel", "Montserrat", serif;
   }
 }
 
 /* Polished Marble Texture Background */
 body {
-  background-color: #F8F9FA;
-  background-image: 
+  background-color: #f8f9fa;
+  background-image:
     radial-gradient(at 0% 0%, rgba(226, 232, 240, 0.5) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.04) 0px, transparent 50%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='%20293B' fill-opacity='0.025'%3E%3Cpath d='M0 0h400v400H0z' fill='none'/%3E%3Cpath d='M150 50 Q 200 120 180 200 T 250 350 M300 20 Q 320 80 370 140 M50 220 Q 120 280 80 380' stroke='%230D1B2A' stroke-width='1.2' stroke-linecap='round' fill='none' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E");
-  color: #1E293B;
+  color: #1e293b;
 }
 
 /* Greek Meander / Greca Border Divider */
@@ -39,10 +44,10 @@ body {
 }
 .frise-title-container::before,
 .frise-title-container::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #C5A059 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #c5a059 50%, transparent 100%);
 }
 
 /* Scrollbar */
@@ -51,30 +56,34 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F3F5;
+  background: #f1f3f5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C5A059;
+  background: #c5a059;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #D4AF37;
+  background: #d4af37;
 }
 
 /* Micro-Relief Cards */
 .card-architectural {
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 20px -2px rgba(13, 27, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 4px 20px -2px rgba(13, 27, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   border-radius: 1rem;
 }
 
 .btn-relief-gold {
-  background: linear-gradient(135deg, #D4AF37 0%, #C5A059 100%);
-  color: #0D1B2A;
+  background: linear-gradient(135deg, #d4af37 0%, #c5a059 100%);
+  color: #0d1b2a;
   font-weight: 800;
-  box-shadow: 0 4px 14px -2px rgba(197, 160, 89, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border: 1px solid #B8860B;
+  box-shadow:
+    0 4px 14px -2px rgba(197, 160, 89, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid #b8860b;
   transition: all 0.2s ease-in-out;
 }
 .btn-relief-gold:hover {
@@ -84,14 +93,14 @@ body {
 }
 
 .btn-relief-navy {
-  background: linear-gradient(135deg, #0D1B2A 0%, #0A192F 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #0d1b2a 0%, #0a192f 100%);
+  color: #ffffff;
   font-weight: 700;
   border: 1px solid rgba(197, 160, 89, 0.5);
   box-shadow: 0 4px 14px -2px rgba(13, 27, 42, 0.3);
   transition: all 0.2s ease-in-out;
 }
 .btn-relief-navy:hover {
-  border-color: #D4AF37;
+  border-color: #d4af37;
   transform: translateY(-1px);
 }

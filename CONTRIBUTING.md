@@ -1,189 +1,113 @@
-# 🤝 Guía de Contribución — Sublimaciones Roman
+# Guía de contribución
 
-¡Gracias por tu interés en contribuir a **Sublimaciones Roman**! Esta guía explica el flujo de trabajo esperado para garantizar la calidad del código y la coherencia del proyecto.
+## Requisitos
 
----
-
-## 🚀 Configuración del Entorno de Desarrollo
-
-### Requisitos Previos
-
-| Herramienta | Versión Mínima | Verificar con |
-|-------------|---------------|---------------|
-| Node.js | 18.x | `node --version` |
-| npm | 9.x | `npm --version` |
-| Git | 2.39+ | `git --version` |
-
-### Instalación
+- Git 2.39 o posterior
+- Node.js 22.14 o posterior (o 24.10 o posterior) y npm 9 o posterior
 
 ```bash
-# 1. Fork y clonar
-git clone https://github.com/TU_USUARIO/sublimaciones-roman.git
+git clone https://github.com/fromancore/sublimaciones-roman.git
 cd sublimaciones-roman
-
-# 2. Instalar dependencias (activa los Git hooks automáticamente)
-npm install
-
-# 3. Configurar variables de entorno
+npm ci
+# Bash
 cp .env.example .env.local
-# → Editar .env.local con los valores reales (nunca commitear este archivo)
-
-# 4. Verificar que todo funciona
+# PowerShell equivalent: Copy-Item .env.example .env.local
 npm run ci
-
-# 5. Iniciar servidor de desarrollo
 npm run dev
 ```
 
----
+`.env.local` es local y no se debe versionar. Las variables `VITE_*` se incorporan al bundle del navegador; no guardes
+secretos ni credenciales privadas en ellas.
 
-## 🌳 Estrategia de Ramas
+## Estrategia de ramas: Trunk-Based Development
 
-| Rama | Propósito | Desde | Merge hacia |
-|------|-----------|-------|-------------|
-| `main` | Producción estable | — | — |
-| `develop` | Integración de features | `main` | `main` (via release) |
-| `feature/*` | Nuevas funcionalidades | `develop` | `develop` |
-| `hotfix/*` | Correcciones urgentes en producción | `main` | `main` + `develop` |
-| `release/*` | Preparación de release | `develop` | `main` + `develop` |
+`main` es la única rama permanente y contiene código integrado y verificable. No se mantienen `develop` ni ramas de
+release. El trabajo se realiza en ramas cortas y se integra a `main` exclusivamente mediante Pull Request:
 
-### Nomenclatura de Ramas
-
-```
-feature/descripcion-en-kebab-case
-fix/nombre-del-bug
-hotfix/nombre-del-fix
-release/v1.2.0
-docs/actualizar-readme
-```
-
----
-
-## 📝 Estándar de Commits
-
-Usamos [Conventional Commits](https://www.conventionalcommits.org/). El hook `commit-msg` valida automáticamente tu commit antes de crearlo.
-
-### Formato
-
-```
-<tipo>(<alcance>): <descripción corta en imperativo>
-
-[cuerpo opcional]
-
-[footer opcional]
-```
-
-### Tipos Válidos
-
-- `feat` — Nueva funcionalidad
-- `fix` — Corrección de error
-- `docs` — Solo cambios de documentación
-- `style` — Formato sin cambios de lógica
-- `refactor` — Refactorización sin feat/fix
-- `perf` — Mejora de rendimiento
-- `test` — Agregar o corregir pruebas
-- `build` — Build system o dependencias
-- `ci` — Cambios en CI/CD
-- `chore` — Otras tareas de mantenimiento
-- `revert` — Revertir un commit anterior
-
-### Ejemplos
+| Rama                    | Uso                | Destino |
+| ----------------------- | ------------------ | ------- |
+| `feature/<descripcion>` | Funcionalidad      | `main`  |
+| `fix/<descripcion>`     | Corrección         | `main`  |
+| `hotfix/<descripcion>`  | Corrección urgente | `main`  |
+| `docs/<descripcion>`    | Documentación      | `main`  |
 
 ```bash
-feat(cart): add quantity controls to cart items
-fix(auth): resolve token expiry loop on page refresh
-docs(contributing): update local setup instructions
-test(catalog): add unit tests for product filtering
-refactor(header): extract navigation into separate component
+git switch main
+git pull --ff-only origin main
+git switch -c feature/descripcion-breve
+# implementar y ejecutar npm run ci
+git add -p
+git commit -m "feat(catalog): add product filters"
+git push -u origin feature/descripcion-breve
+# Abrir un Pull Request hacia main, revisar el check CI y solicitar aprobación.
 ```
 
----
+Mantén las ramas breves, actualízalas desde `main` antes del PR y evita commits de merge innecesarios. Los hotfixes
+siguen el mismo flujo de PR y verificaciones.
 
-## 🔄 Flujo de Trabajo de una Feature
+### Protección requerida en GitHub
 
-```bash
-# 1. Asegurarse de que develop está actualizado
-git checkout develop
-git pull origin develop
+La protección es una configuración del repositorio remoto y no puede imponerse desde un clone local. En **Settings →
+Rules → Rulesets** (o **Branches → Add branch protection rule**), crea una regla activa para `main` con:
 
-# 2. Crear rama de feature
-git checkout -b feature/nombre-descriptivo
+- exigir Pull Request antes de integrar (al menos una aprobación);
+- exigir que la aprobación más reciente sea posterior a los cambios solicitados;
+- exigir que la rama esté al día con la base antes de integrar;
+- exigir el check de estado **`CI / CI`** (workflow/job);
+- permitir squash merge y desactivar merge commits para conservar títulos de PR validados en el historial;
+- bloquear force-push y eliminación de `main`;
+- no permitir bypass, salvo una excepción administrativa deliberada.
 
-# 3. Desarrollar con commits atómicos
-#    (el hook pre-commit corre ESLint + Prettier automáticamente)
-git add -p  # Staging interactivo para commits atómicos
-git commit -m "feat(catalog): add product rating display"
+Las ramas `feature/*`, `fix/*`, `hotfix/*` y `docs/*` son efímeras; se protegen por la regla obligatoria de PR y CI al
+apuntar a `main`, no con políticas permanentes por patrón.
 
-# 4. Mantener la rama actualizada con develop
-git fetch origin
-git rebase origin/develop
+## Commits
 
-# 5. Push
-git push origin feature/nombre-descriptivo
+Se valida [Conventional Commits](https://www.conventionalcommits.org/) mediante Commitlint en el hook `commit-msg` y en
+CI. El formato es:
 
-# 6. Abrir Pull Request hacia 'develop' en GitHub
-#    (completar el template de PR)
+```text
+<tipo>(<alcance opcional>): <descripción en imperativo>
 ```
 
----
+Tipos habituales: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` y `revert`. Usa `!`
+o un footer `BREAKING CHANGE:` para indicar cambios incompatibles.
 
-## ✅ Checklist Antes de Abrir un PR
+```text
+feat(cart): add quantity controls
+fix(auth): handle expired sessions
+docs(contributing): explain pull request flow
+test(catalog): cover product filtering
+refactor(header): extract navigation component
+```
+
+Cada commit debe representar un cambio coherente, ser revisable y dejar el árbol en un estado funcional. Usa
+`git add -p` para separar cambios no relacionados. El hook `pre-commit` ejecuta ESLint y Prettier sobre los archivos
+preparados.
+
+## Verificaciones locales
 
 ```bash
-# Verificación completa (igual que el CI)
+npm run lint
+npm run format:check
+npm run build
+npm run test
+npm run test:coverage
 npm run ci
-
-# Que incluye:
-npm run lint          # Cero errores y cero warnings
-npm run format:check  # Formato correcto
-npm run build         # Build exitoso
-npm run test:coverage # Tests pasando con cobertura ≥60%
 ```
 
----
+CI ejecuta validación de commits, lint, formato, build y pruebas con reporte de cobertura. Los avisos de ESLint se
+muestran para seguimiento; errores de lint, formato, build o pruebas bloquean el check. El reporte de cobertura es
+informativo y no existe un umbral porcentual configurado.
 
-## 🧪 Pruebas
+## Pull Requests
 
-```bash
-npm run test          # Ejecutar tests una vez
-npm run test:watch    # Tests en modo watch (TDD)
-npm run test:coverage # Tests con reporte de cobertura
-npm run test:ui       # Interfaz visual de Vitest
-```
+Abre el PR hacia `main`, usa el template, resume propósito, impacto y pruebas y usa un título Conventional Commit. El
+check **CI / CI** debe terminar correctamente antes del merge. Los fallos aparecen en el estado del PR y en **Actions**;
+corrige la causa y vuelve a subir los cambios antes de solicitar integración.
 
-Los archivos de prueba deben:
-- Ubicarse en `src/test/` o junto al componente como `ComponentName.test.jsx`
-- Seguir la convención de nombres: `[NombreComponente].test.{js,jsx}`
-- Cubrir: renderizado sin errores, interacciones principales, casos borde
+## Releases
 
----
-
-## 🐛 Reportar un Bug
-
-1. Verificar que no existe un [issue similar](https://github.com/fromancore/sublimaciones-roman/issues)
-2. Crear un nuevo issue usando el template **🐛 Reporte de Error**
-3. Incluir pasos de reproducción, comportamiento esperado vs actual, y capturas
-
----
-
-## 🚀 Proponer una Funcionalidad
-
-1. Crear un issue usando el template **🚀 Nueva Funcionalidad**
-2. Describir el problema que resuelve y la solución propuesta
-3. Esperar aprobación del equipo antes de implementar
-
----
-
-## 📋 Código de Conducta
-
-Este proyecto sigue los principios de comunicación respetuosa y colaborativa. Los comentarios en PRs e issues deben ser constructivos y orientados al código, nunca a la persona.
-
----
-
-## 📚 Recursos Adicionales
-
-- [Conventional Commits](https://www.conventionalcommits.org/es/)
-- [Semantic Versioning](https://semver.org/lang/es/)
-- [GitFlow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
-- [Vitest Docs](https://vitest.dev/)
+Al completarse correctamente CI en `main`, el workflow de release analiza los commits convencionales y publica una
+etiqueta semántica y un GitHub Release. Los releases no escriben commits automatizados en `main`, por lo que respetan la
+protección de rama.

@@ -8,7 +8,7 @@ export const USUARIOS_INICIALES = [
     email: 'admin@sublimacionesroman.com',
     telefono: '9372830402',
     role: 'admin',
-    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' // 'admin123'
+    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // 'admin123'
   },
   {
     id: 'usr-2',
@@ -16,7 +16,7 @@ export const USUARIOS_INICIALES = [
     email: 'diseno@sublimacionesroman.com',
     telefono: '9372830402',
     role: 'disenador',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb'
+    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
   },
   {
     id: 'usr-3',
@@ -24,7 +24,7 @@ export const USUARIOS_INICIALES = [
     email: 'produccion@sublimacionesroman.com',
     telefono: '9372830402',
     role: 'produccion',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb'
+    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
   },
   {
     id: 'usr-4',
@@ -32,7 +32,7 @@ export const USUARIOS_INICIALES = [
     email: 'entregas@sublimacionesroman.com',
     telefono: '9372830402',
     role: 'entregas',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb'
+    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
   },
   {
     id: 'usr-5',
@@ -40,9 +40,9 @@ export const USUARIOS_INICIALES = [
     email: 'carlos@ejemplo.com',
     telefono: '9991234567',
     role: 'cliente',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb'
-  }
-];
+    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
+  },
+]
 
 export const PRODUCTOS_INICIALES = [
   {
@@ -52,11 +52,12 @@ export const PRODUCTOS_INICIALES = [
     price: 135,
     productionTime: '48 - 72 hrs',
     material: 'Cerámica con recubrimiento sensible al calor',
-    description: 'Revela tu diseño personalizado al contacto con bebidas calientes. Impresión HD duradera.',
+    description:
+      'Revela tu diseño personalizado al contacto con bebidas calientes. Impresión HD duradera.',
     badge: 'Más Vendido',
     type: 'taza',
     colors: ['#0D1B2A', '#000000', '#1B2A4A'],
-    popularImage: '🍵'
+    popularImage: '🍵',
   },
   {
     id: 'prod-termo-01',
@@ -65,11 +66,12 @@ export const PRODUCTOS_INICIALES = [
     price: 260,
     productionTime: '48 - 72 hrs',
     material: 'Acero Grado Alimenticio 304 Doble Pared',
-    description: 'Conserva bebidas frías 12h y calientes 8h. Acabado brillante con impresión sublimada full color.',
+    description:
+      'Conserva bebidas frías 12h y calientes 8h. Acabado brillante con impresión sublimada full color.',
     badge: 'Premium',
     type: 'termo',
     colors: ['#FFFFFF', '#0D1B2A', '#C0C0C0'],
-    popularImage: '🥤'
+    popularImage: '🥤',
   },
   {
     id: 'prod-playera-01',
@@ -78,11 +80,12 @@ export const PRODUCTOS_INICIALES = [
     price: 220,
     productionTime: '48 - 72 hrs',
     material: 'Poliéster 100% Microfibra de Alta Densidad',
-    description: 'Transpirable, suave y de secado rápido. Colores vívidos que no se desvanecen con el lavado.',
+    description:
+      'Transpirable, suave y de secado rápido. Colores vívidos que no se desvanecen con el lavado.',
     badge: 'Popular',
     type: 'playera',
     colors: ['#FFFFFF', '#F0F4F8', '#E2E8F0'],
-    popularImage: '👕'
+    popularImage: '👕',
   },
   {
     id: 'prod-gorra-01',
@@ -91,11 +94,12 @@ export const PRODUCTOS_INICIALES = [
     price: 110,
     productionTime: '48 - 72 hrs',
     material: 'Frente Poliéster con Malla Respirable',
-    description: 'Ajuste broche plástico retro. Ideal para logotipos, clubes, eventos y regalos de empresa.',
+    description:
+      'Ajuste broche plástico retro. Ideal para logotipos, clubes, eventos y regalos de empresa.',
     badge: 'Económico',
     type: 'gorra',
     colors: ['#0D1B2A', '#2A6F97', '#000000'],
-    popularImage: '🧢'
+    popularImage: '🧢',
   },
   {
     id: 'prod-cojin-01',
@@ -104,11 +108,12 @@ export const PRODUCTOS_INICIALES = [
     price: 180,
     productionTime: '48 - 72 hrs',
     material: 'Funda de Tela Lino Poliéster Removible',
-    description: 'Incluye relleno siliconizado ultra suave. Impresión por ambos lados con tus fotos o ilustraciones.',
+    description:
+      'Incluye relleno siliconizado ultra suave. Impresión por ambos lados con tus fotos o ilustraciones.',
     badge: 'Regalo Perfecto',
     type: 'cojin',
     colors: ['#FFFFFF', '#F8F9FA'],
-    popularImage: '🛋️'
+    popularImage: '🛋️',
   },
   {
     id: 'prod-mousepad-01',
@@ -121,7 +126,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Gamer XL',
     type: 'mousepad',
     colors: ['#0D1B2A', '#000000'],
-    popularImage: '🖱️'
+    popularImage: '🖱️',
   },
   {
     id: 'prod-llavero-01',
@@ -130,11 +135,12 @@ export const PRODUCTOS_INICIALES = [
     price: 45,
     productionTime: '48 - 72 hrs',
     material: 'Polímero Ultra Resistente con Herraje Metálico',
-    description: 'Resistente a caídas y rayaduras. Personalizable con fotos distintas en frente y vuelta.',
+    description:
+      'Resistente a caídas y rayaduras. Personalizable con fotos distintas en frente y vuelta.',
     badge: 'Detalle',
     type: 'llavero',
     colors: ['#FFFFFF'],
-    popularImage: '🔑'
+    popularImage: '🔑',
   },
   {
     id: 'prod-taza-02',
@@ -143,25 +149,26 @@ export const PRODUCTOS_INICIALES = [
     price: 95,
     productionTime: '48 - 72 hrs',
     material: 'Cerámica Blanca de Alta Pureza Grado A',
-    description: 'Apta para microondas y lavavajillas. Superficie ultra brillante para colores radiantes.',
+    description:
+      'Apta para microondas y lavavajillas. Superficie ultra brillante para colores radiantes.',
     badge: 'Clásico',
     type: 'taza',
     colors: ['#FFFFFF'],
-    popularImage: '☕'
-  }
-];
+    popularImage: '☕',
+  },
+]
 
-export const PEDIDOS_INICIALES = [];
+export const PEDIDOS_INICIALES = []
 
-export const DETALLES_PEDIDO_INICIALES = [];
+export const DETALLES_PEDIDO_INICIALES = []
 
-export const ARCHIVOS_DISENO_INICIALES = [];
+export const ARCHIVOS_DISENO_INICIALES = []
 
-export const PAGOS_INICIALES = [];
+export const PAGOS_INICIALES = []
 
-export const HISTORIAL_ESTADOS_INICIALES = [];
+export const HISTORIAL_ESTADOS_INICIALES = []
 
-export const INCIDENCIAS_INICIALES = [];
+export const INCIDENCIAS_INICIALES = []
 
 // Funciones utilitarias para persistencia y simulación de API
 export function cargarDatosIniciales() {
@@ -173,6 +180,6 @@ export function cargarDatosIniciales() {
     archivosDiseno: [...ARCHIVOS_DISENO_INICIALES],
     pagos: [...PAGOS_INICIALES],
     historial: [...HISTORIAL_ESTADOS_INICIALES],
-    incidencias: [...INCIDENCIAS_INICIALES]
-  };
+    incidencias: [...INCIDENCIAS_INICIALES],
+  }
 }

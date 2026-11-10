@@ -17,111 +17,119 @@ export default function PaymentModal({ order, onClose, onRegisterPayment }) {
   if (!order) return null
 
   const total = order.total
-  const saldoPendiente = order.remainingBalance !== undefined ? order.remainingBalance : Math.max(0, total - (order.depositPaid || 0))
+  const saldoPendiente =
+    order.remainingBalance !== undefined
+      ? order.remainingBalance
+      : Math.max(0, total - (order.depositPaid || 0))
   const depositAmount = Math.round(total * 0.5)
   const amountToPay = paymentOption === 'deposit' ? depositAmount : saldoPendiente
   const remainingAfterPayment = Math.max(0, saldoPendiente - amountToPay)
 
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = e => {
+    const file = e.target.files[0]
     if (file) {
-      setFileName(file.name);
-      setFileAttached(true);
+      setFileName(file.name)
+      setFileAttached(true)
     }
-  };
+  }
 
-  const handleOptionChange = (option) => {
-    setPaymentOption(option);
-    setErrorMonto('');
-    const amt = option === 'deposit' ? depositAmount : saldoPendiente;
+  const handleOptionChange = option => {
+    setPaymentOption(option)
+    setErrorMonto('')
+    const amt = option === 'deposit' ? depositAmount : saldoPendiente
     if (amt <= 0) {
-      setErrorMonto('El monto debe ser mayor a 0');
+      setErrorMonto('El monto debe ser mayor a 0')
     } else if (amt > saldoPendiente) {
-      setErrorMonto('El monto excede el saldo pendiente');
+      setErrorMonto('El monto excede el saldo pendiente')
     }
-  };
+  }
 
-  const handleSubmitPayment = (e) => {
-    e.preventDefault();
+  const handleSubmitPayment = e => {
+    e.preventDefault()
     if (amountToPay <= 0) {
-      setErrorMonto('El monto debe ser mayor a 0');
-      return;
+      setErrorMonto('El monto debe ser mayor a 0')
+      return
     }
     if (amountToPay > saldoPendiente) {
-      setErrorMonto('El monto excede el saldo pendiente');
-      return;
+      setErrorMonto('El monto excede el saldo pendiente')
+      return
     }
-    setErrorMonto('');
-    setIsProcessing(true);
+    setErrorMonto('')
+    setIsProcessing(true)
 
     setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-      
+      setIsProcessing(false)
+      setIsSuccess(true)
+
       confetti({
         particleCount: 80,
         spread: 60,
-        origin: { y: 0.6 }
-      });
+        origin: { y: 0.6 },
+      })
 
       setTimeout(() => {
         onRegisterPayment(order.id, amountToPay, remainingAfterPayment, {
           monto: amountToPay,
           metodo: paymentMethod,
           comprobanteNombre: fileName || 'comprobante_pago.pdf',
-          estado: 'Pendiente de validación'
-        });
-        onClose();
-      }, 1800);
-    }, 1200);
-  };
+          estado: 'Pendiente de validación',
+        })
+        onClose()
+      }, 1800)
+    }, 1200)
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="relative w-full max-w-lg bg-roman-dark border border-roman-gold/50 rounded-3xl shadow-2xl overflow-hidden animate-fadeIn">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md">
+      <div className="animate-fadeIn relative w-full max-w-lg overflow-hidden rounded-3xl border border-roman-gold/50 bg-roman-dark shadow-2xl">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-roman-navy to-slate-900 border-b border-roman-blue/40">
+        <div className="flex items-center justify-between border-b border-roman-blue/40 bg-gradient-to-r from-roman-navy to-slate-900 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-roman-gold/20 border border-roman-gold/40 text-roman-gold">
-              <CreditCard className="w-5 h-5" />
+            <div className="rounded-xl border border-roman-gold/40 bg-roman-gold/20 p-2 text-roman-gold">
+              <CreditCard className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-headline font-bold text-base text-white">
+              <h3 className="font-headline text-base font-bold text-white">
                 Registro de Anticipo / Pago ({order.id})
               </h3>
-              <p className="text-xs text-slate-400">Adjunta tu evidencia de transferencia o depósito</p>
+              <p className="text-xs text-slate-400">
+                Adjunta tu evidencia de transferencia o depósito
+              </p>
             </div>
           </div>
 
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1">
-            <X className="w-6 h-6" />
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Modal Content */}
         {isSuccess ? (
-          <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-10 h-10" />
+          <div className="space-y-4 p-8 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400">
+              <CheckCircle2 className="h-10 w-10" />
             </div>
-            <h4 className="font-headline font-bold text-xl text-white">¡Comprobante Registrado!</h4>
+            <h4 className="font-headline text-xl font-bold text-white">¡Comprobante Registrado!</h4>
             <p className="text-xs text-slate-300">
-              Hemos registrado tu pago de <strong className="text-roman-gold">${amountToPay} MXN</strong> con estado <strong className="text-amber-400">«Pendiente de validación»</strong>. Será revisado y aprobado por Administración.
+              Hemos registrado tu pago de{' '}
+              <strong className="text-roman-gold">${amountToPay} MXN</strong> con estado{' '}
+              <strong className="text-amber-400">«Pendiente de validación»</strong>. Será revisado y
+              aprobado por Administración.
             </p>
             <p className="text-[11px] text-slate-400">
-              Saldo pendiente estimado: <strong className="text-emerald-400">${remainingAfterPayment} MXN</strong>
+              Saldo pendiente estimado:{' '}
+              <strong className="text-emerald-400">${remainingAfterPayment} MXN</strong>
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmitPayment} className="p-6 space-y-6">
-            
+          <form onSubmit={handleSubmitPayment} className="space-y-6 p-6">
             {/* Financial Breakdown Table */}
-            <div className="p-4 rounded-2xl bg-roman-navy/80 border border-slate-700/80 space-y-2">
+            <div className="space-y-2 rounded-2xl border border-slate-700/80 bg-roman-navy/80 p-4">
               <div className="flex justify-between text-xs text-slate-300">
                 <span>Producto:</span>
-                <span className="font-semibold text-white">{order.item} ({order.quantity} pza)</span>
+                <span className="font-semibold text-white">
+                  {order.item} ({order.quantity} pza)
+                </span>
               </div>
               <div className="flex justify-between text-xs text-slate-300">
                 <span>Monto Total del Pedido:</span>
@@ -131,67 +139,71 @@ export default function PaymentModal({ order, onClose, onRegisterPayment }) {
                 <span>Saldo Pendiente Actual:</span>
                 <span className="font-bold text-amber-400">${saldoPendiente} MXN</span>
               </div>
-              <div className="flex justify-between text-xs text-roman-gold font-semibold pt-1 border-t border-slate-700">
+              <div className="flex justify-between border-t border-slate-700 pt-1 text-xs font-semibold text-roman-gold">
                 <span>Monto a Abonar Ahora:</span>
-                <span className="font-black text-lg">${amountToPay} MXN</span>
+                <span className="text-lg font-black">${amountToPay} MXN</span>
               </div>
-              <div className="flex justify-between text-[11px] text-slate-400 pt-0.5">
+              <div className="flex justify-between pt-0.5 text-[11px] text-slate-400">
                 <span>Saldo Pendiente Posterior:</span>
-                <span className="font-mono text-emerald-400 font-bold">${remainingAfterPayment} MXN</span>
+                <span className="font-mono font-bold text-emerald-400">
+                  ${remainingAfterPayment} MXN
+                </span>
               </div>
             </div>
 
             {errorMonto && (
-              <div className="p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-200 text-xs font-semibold text-center">
+              <div className="rounded-xl border border-red-500/80 bg-red-950/80 p-3 text-center text-xs font-semibold text-red-200">
                 {errorMonto}
               </div>
             )}
 
             {/* Payment Type Selection */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
                 Selecciona Tipo de Pago:
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => handleOptionChange('deposit')}
-                  className={`p-3 rounded-xl border text-left text-xs transition-all ${
+                  className={`rounded-xl border p-3 text-left text-xs transition-all ${
                     paymentOption === 'deposit'
-                      ? 'bg-roman-blue/30 border-roman-cyan text-roman-cyan font-bold'
-                      : 'bg-slate-900 border-slate-700 text-slate-400'
+                      ? 'border-roman-cyan bg-roman-blue/30 font-bold text-roman-cyan'
+                      : 'border-slate-700 bg-slate-900 text-slate-400'
                   }`}
                 >
-                  <p className="font-headline uppercase text-[11px]">50% Anticipo Inicial</p>
-                  <p className="text-sm font-black text-white mt-1">${depositAmount} MXN</p>
+                  <p className="font-headline text-[11px] uppercase">50% Anticipo Inicial</p>
+                  <p className="mt-1 text-sm font-black text-white">${depositAmount} MXN</p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleOptionChange('full')}
-                  className={`p-3 rounded-xl border text-left text-xs transition-all ${
+                  className={`rounded-xl border p-3 text-left text-xs transition-all ${
                     paymentOption === 'full'
-                      ? 'bg-roman-blue/30 border-roman-cyan text-roman-cyan font-bold'
-                      : 'bg-slate-900 border-slate-700 text-slate-400'
+                      ? 'border-roman-cyan bg-roman-blue/30 font-bold text-roman-cyan'
+                      : 'border-slate-700 bg-slate-900 text-slate-400'
                   }`}
                 >
-                  <p className="font-headline uppercase text-[11px]">100% Pago Completo</p>
-                  <p className="text-sm font-black text-white mt-1">${saldoPendiente} MXN</p>
+                  <p className="font-headline text-[11px] uppercase">100% Pago Completo</p>
+                  <p className="mt-1 text-sm font-black text-white">${saldoPendiente} MXN</p>
                 </button>
               </div>
             </div>
 
             {/* Payment Method */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
                 Método de Pago:
               </label>
               <select
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-roman-cyan"
+                onChange={e => setPaymentMethod(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-roman-cyan focus:outline-none"
               >
-                <option value="transfer">Transferencia Interbancaria (SPEI / BBVA / Banamex)</option>
+                <option value="transfer">
+                  Transferencia Interbancaria (SPEI / BBVA / Banamex)
+                </option>
                 <option value="oxxo">Depósito en OXXO / 7-Eleven</option>
                 <option value="cash">Efectivo al recoger en Taller Mérida</option>
               </select>
@@ -199,25 +211,27 @@ export default function PaymentModal({ order, onClose, onRegisterPayment }) {
 
             {/* Upload Receipt File */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-200 uppercase tracking-wider block">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-200">
                 Adjuntar Foto o Ficha de Depósito:
               </label>
-              <div className="relative border-2 border-dashed border-slate-700 hover:border-roman-gold rounded-2xl p-4 text-center bg-slate-900/60">
+              <div className="relative rounded-2xl border-2 border-dashed border-slate-700 bg-slate-900/60 p-4 text-center hover:border-roman-gold">
                 <input
                   type="file"
                   accept="image/*, application/pdf"
                   onChange={handleFileChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 />
                 {fileAttached ? (
-                  <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-xs">
-                    <FileCheck className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-400">
+                    <FileCheck className="h-4 w-4" />
                     <span>Ficha adjunta: {fileName}</span>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <Upload className="w-5 h-5 text-slate-400 mx-auto" />
-                    <p className="text-xs text-slate-300 font-medium">Subir foto del comprobante de transferencia</p>
+                    <Upload className="mx-auto h-5 w-5 text-slate-400" />
+                    <p className="text-xs font-medium text-slate-300">
+                      Subir foto del comprobante de transferencia
+                    </p>
                   </div>
                 )}
               </div>
@@ -227,22 +241,20 @@ export default function PaymentModal({ order, onClose, onRegisterPayment }) {
             <button
               type="submit"
               disabled={isProcessing}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-roman-blue via-roman-cyan to-roman-blue text-roman-dark font-headline font-black text-xs tracking-wider shadow-electric hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="shadow-electric flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-roman-blue via-roman-cyan to-roman-blue py-3.5 font-headline text-xs font-black tracking-wider text-roman-dark transition-all hover:brightness-110 active:scale-95"
             >
               {isProcessing ? (
                 <span>REGISTRANDO PAGO...</span>
               ) : (
                 <>
                   <span>CONFIRMAR REGISTRO DE PAGO</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
-
           </form>
         )}
-
       </div>
     </div>
-  );
+  )
 }

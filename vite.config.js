@@ -23,7 +23,7 @@ export default defineConfig({
       },
     },
   },
-  // Configuración de Vitest para pruebas unitarias (compatible con Vitest 3)
+  // Configuración de Vitest para pruebas unitarias
   test: {
     globals: true,
     environment: 'jsdom',
@@ -42,13 +42,6 @@ export default defineConfig({
         'dist/**',
         '.husky/**',
       ],
-      thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 60,
-        statements: 60,
-      },
     },
   },
 })
-

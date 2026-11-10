@@ -1,5 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Upload, Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon, Type, Shield, FileCheck, ShoppingCart, Columns, Phone } from 'lucide-react'
+import {
+  X,
+  Upload,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  Image as ImageIcon,
+  Type,
+  Shield,
+  FileCheck,
+  ShoppingCart,
+  Columns,
+  Phone,
+} from 'lucide-react'
 import { cotizar } from '../services/cotizacion.js'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
@@ -30,152 +43,147 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
   const canvasRef = useRef(null)
 
+  // Draw 2D Canvas Mockup Preview
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    ctx.fillStyle = selectedColor
+    ctx.beginPath()
+    ctx.roundRect(20, 20, canvas.width - 40, canvas.height - 40, 20)
+    ctx.fill()
+    ctx.strokeStyle = '#C5A059'
+    ctx.lineWidth = 3
+    ctx.stroke()
+
+    ctx.fillStyle = 'rgba(13, 27, 42, 0.08)'
+    ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80)
+
+    if (uploadedImage && uploadedImage !== 'DOCUMENT_FILE') {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.src = uploadedImage
+      img.onload = () => {
+        ctx.drawImage(img, canvas.width / 2 - 45, 65, 90, 90)
+        renderText()
+      }
+    } else {
+      ctx.font = '40px serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('🏛️', canvas.width / 2, 110)
+      renderText()
+    }
+
+    function renderText() {
+      if (!customText) return
+      ctx.font = `bold ${fontSize}px Cinzel, serif`
+      ctx.fillStyle = textColor
+      ctx.textAlign = 'center'
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+      ctx.shadowBlur = 4
+      ctx.fillText(customText.toUpperCase(), canvas.width / 2, 190)
+      ctx.shadowBlur = 0
+    }
+  }, [customText, textColor, fontSize, uploadedImage, selectedColor, product])
+
   // Early return después de los hooks
   if (!product) return null
 
   // Price Calculation mediante servicio cotizacion.js
-  const cotizacionResultado = cotizar(product.price, quantity);
-  const unitPrice = product.price;
-  const totalPrice = cotizacionResultado.total;
-  const subtotal = cotizacionResultado.subtotal;
-  const descuento = cotizacionResultado.descuento;
-  const quantityDiscount = cotizacionResultado.porcentaje;
-  const discountedUnitPrice = quantity > 0 ? (totalPrice / quantity) : product.price;
+  const cotizacionResultado = cotizar(product.price, quantity)
+  const unitPrice = product.price
+  const totalPrice = cotizacionResultado.total
+  const subtotal = cotizacionResultado.subtotal
+  const descuento = cotizacionResultado.descuento
+  const quantityDiscount = cotizacionResultado.porcentaje
+  const discountedUnitPrice = quantity > 0 ? totalPrice / quantity : product.price
 
   // Formatos admitidos: JPG, PNG, PDF, AI, PSD
-  const FORMATOS_PERMITIDOS = ['.jpg', '.jpeg', '.png', '.pdf', '.ai', '.psd'];
-  const LIMITE_TAMANO_BYTES = 50 * 1024 * 1024; // 50 MB
+  const FORMATOS_PERMITIDOS = ['.jpg', '.jpeg', '.png', '.pdf', '.ai', '.psd']
+  const LIMITE_TAMANO_BYTES = 50 * 1024 * 1024 // 50 MB
 
   // File Upload Simulator (Firebase Storage Mock) con validaciones
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleFileUpload = e => {
+    const file = e.target.files[0]
+    if (!file) return
 
-    setErrorArchivo('');
+    setErrorArchivo('')
 
     // Validar extensión
-    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    const ext = `.${file.name.split('.').pop().toLowerCase()}`
     if (!FORMATOS_PERMITIDOS.includes(ext)) {
-      setErrorArchivo('Formato no admitido');
-      return;
+      setErrorArchivo('Formato no admitido')
+      return
     }
 
     // Validar tamaño máximo 50 MB
     if (file.size > LIMITE_TAMANO_BYTES) {
-      setErrorArchivo('El archivo supera 50 MB');
-      return;
+      setErrorArchivo('El archivo supera 50 MB')
+      return
     }
 
-    setUploading(true);
-    setUploadProgress(10);
-    setFileName(file.name);
+    setUploading(true)
+    setUploadProgress(10)
+    setFileName(file.name)
 
     const interval = setInterval(() => {
-      setUploadProgress((prev) => {
+      setUploadProgress(prev => {
         if (prev >= 100) {
-          clearInterval(interval);
-          setUploading(false);
-          
+          clearInterval(interval)
+          setUploading(false)
+
           if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              setUploadedImage(event.target.result);
-            };
-            reader.readAsDataURL(file);
+            const reader = new FileReader()
+            reader.onload = event => {
+              setUploadedImage(event.target.result)
+            }
+            reader.readAsDataURL(file)
           } else {
-            setUploadedImage('DOCUMENT_FILE');
+            setUploadedImage('DOCUMENT_FILE')
           }
-          return 100;
+          return 100
         }
-        return prev + 30;
-      });
-    }, 200);
-  };
-
-  // Draw 2D Canvas Mockup Preview
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    
-    // Clear Canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw Background Product Color
-    ctx.fillStyle = selectedColor;
-    ctx.beginPath();
-    ctx.roundRect(20, 20, canvas.width - 40, canvas.height - 40, 20);
-    ctx.fill();
-    ctx.strokeStyle = '#C5A059';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Inner Area Frame
-    ctx.fillStyle = 'rgba(13, 27, 42, 0.08)';
-    ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80);
-
-    // Render Uploaded Image Reference if Available
-    if (uploadedImage && uploadedImage !== 'DOCUMENT_FILE') {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = uploadedImage;
-      img.onload = () => {
-        ctx.drawImage(img, canvas.width / 2 - 45, 65, 90, 90);
-        renderText();
-      };
-    } else {
-      ctx.font = '40px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🏛️', canvas.width / 2, 110);
-      renderText();
-    }
-
-    function renderText() {
-      if (!customText) return;
-      ctx.font = `bold ${fontSize}px Cinzel, serif`;
-      ctx.fillStyle = textColor;
-      ctx.textAlign = 'center';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.shadowBlur = 4;
-      ctx.fillText(customText.toUpperCase(), canvas.width / 2, 190);
-      ctx.shadowBlur = 0;
-    }
-
-  }, [customText, textColor, fontSize, uploadedImage, selectedColor, product]);
+        return prev + 30
+      })
+    }, 200)
+  }
 
   // Validación de teléfono: 10-15 dígitos, permite prefijo + y espacios/guiones
-  const validarTelefono = (valor) => {
-    const soloDigitos = valor.replace(/[\s\-()]+/g, '');
-    const regex = /^\+?\d{10,15}$/;
-    return regex.test(soloDigitos);
-  };
+  const validarTelefono = valor => {
+    const soloDigitos = valor.replace(/[\s\-()]+/g, '')
+    const regex = /^\+?\d{10,15}$/
+    return regex.test(soloDigitos)
+  }
 
   const handleAddToCartSubmit = () => {
-    let hayError = false;
+    let hayError = false
 
     if (quantity < 1) {
-      setErrorCantidad('Cantidad mínima 1');
-      hayError = true;
+      setErrorCantidad('Cantidad mínima 1')
+      hayError = true
     }
 
     if (!telefono.trim()) {
-      setErrorTelefono('El teléfono es obligatorio');
-      hayError = true;
+      setErrorTelefono('El teléfono es obligatorio')
+      hayError = true
     } else if (!validarTelefono(telefono)) {
-      setErrorTelefono('Teléfono inválido (10-15 dígitos)');
-      hayError = true;
+      setErrorTelefono('Teléfono inválido (10-15 dígitos)')
+      hayError = true
     } else {
-      setErrorTelefono('');
+      setErrorTelefono('')
     }
 
-    if (hayError) return;
+    if (hayError) return
     const customizedItem = {
       productId: product.id,
       name: product.name,
       category: product.category,
       basePrice: product.price,
       finalUnitPrice: discountedUnitPrice,
-      totalPrice: totalPrice,
+      totalPrice,
       quantity,
       selectedColor,
       selectedSize: product.type === 'playera' ? selectedSize : null,
@@ -185,44 +193,44 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       uploadedImageUrl: uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null,
       additionalNotes,
       productionTime: product.productionTime,
-      designStatus: 'Pendiente de Aprobación RN-01'
-    };
+      designStatus: 'Pendiente de Aprobación RN-01',
+    }
 
-    onAddToCart(customizedItem);
-    onClose();
-  };
+    onAddToCart(customizedItem)
+    onClose()
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-roman-navy/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
-      <div className="relative w-full max-w-4xl bg-white border-2 border-roman-bronze rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        
+    <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-roman-navy/80 p-4 backdrop-blur-md sm:p-6">
+      <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border-2 border-roman-bronze bg-white shadow-2xl">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-roman-navy text-white border-b border-roman-bronze/40">
+        <div className="flex items-center justify-between border-b border-roman-bronze/40 bg-roman-navy px-6 py-4 text-white">
           <div className="flex items-center gap-3">
-            <Columns className="w-5 h-5 text-roman-gold" />
+            <Columns className="h-5 w-5 text-roman-gold" />
             <div>
-              <h2 className="font-cinzel font-bold text-base sm:text-lg">
+              <h2 className="font-cinzel text-base font-bold sm:text-lg">
                 Estudio 2D: Personalizar <span className="text-roman-gold">{product.name}</span>
               </h2>
-              <p className="text-[11px] text-slate-300">Ajusta el texto, color y archivo de referencia para tu cotización</p>
+              <p className="text-[11px] text-slate-300">
+                Ajusta el texto, color y archivo de referencia para tu cotización
+              </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
           >
-            <X className="w-6 h-6" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 grid grid-cols-1 lg:grid-cols-12 gap-8 bg-roman-stone/50">
-          
+        <div className="grid grid-cols-1 gap-8 space-y-6 overflow-y-auto bg-roman-stone/50 p-6 lg:grid-cols-12">
           {/* Left Column: Live 2D Canvas Preview */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center space-y-4">
-            <div className="relative w-full aspect-square max-w-[320px] bg-white rounded-2xl p-4 border-2 border-roman-bronze/40 flex flex-col items-center justify-center shadow-card-marble">
-              <span className="absolute top-3 left-3 text-[9px] font-headline font-bold uppercase px-2 py-0.5 rounded bg-roman-navy text-roman-gold border border-roman-bronze/40">
+          <div className="flex flex-col items-center justify-center space-y-4 lg:col-span-5">
+            <div className="relative flex aspect-square w-full max-w-[320px] flex-col items-center justify-center rounded-2xl border-2 border-roman-bronze/40 bg-white p-4 shadow-card-marble">
+              <span className="absolute left-3 top-3 rounded border border-roman-bronze/40 bg-roman-navy px-2 py-0.5 font-headline text-[9px] font-bold uppercase text-roman-gold">
                 Previsualización 2D
               </span>
 
@@ -230,25 +238,25 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 ref={canvasRef}
                 width={260}
                 height={260}
-                className="w-full h-full rounded-xl"
+                className="h-full w-full rounded-xl"
               />
             </div>
 
             {/* Colors Selector */}
             {product.colors && product.colors.length > 0 && (
               <div className="w-full max-w-[320px] space-y-2">
-                <label className="text-xs font-headline font-bold text-roman-navy uppercase tracking-wider block">
+                <label className="block font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
                   Color Base del Producto:
                 </label>
                 <div className="flex items-center gap-3">
-                  {product.colors.map((colorHex) => (
+                  {product.colors.map(colorHex => (
                     <button
                       key={colorHex}
                       onClick={() => setSelectedColor(colorHex)}
                       style={{ backgroundColor: colorHex }}
-                      className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                        selectedColor === colorHex 
-                          ? 'border-roman-gold scale-110 shadow-md ring-2 ring-roman-bronze' 
+                      className={`h-8 w-8 rounded-full border-2 transition-transform ${
+                        selectedColor === colorHex
+                          ? 'scale-110 border-roman-gold shadow-md ring-2 ring-roman-bronze'
                           : 'border-slate-300 hover:scale-105'
                       }`}
                     />
@@ -258,38 +266,39 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
             )}
 
             {/* Guarantee Notice */}
-            <div className="w-full max-w-[320px] p-3 rounded-xl bg-white border border-slate-300 text-xs text-slate-700 flex items-start gap-2.5 shadow-sm">
-              <Shield className="w-4 h-4 text-roman-bronze shrink-0 mt-0.5" />
+            <div className="flex w-full max-w-[320px] items-start gap-2.5 rounded-xl border border-slate-300 bg-white p-3 text-xs text-slate-700 shadow-sm">
+              <Shield className="mt-0.5 h-4 w-4 shrink-0 text-roman-bronze" />
               <p className="text-[11px] leading-tight">
-                <strong className="text-roman-navy font-bold">Regla RN-01:</strong> Un diseñador revisará tu archivo y recibirás una prueba visual oficial para aprobar antes de imprimir.
+                <strong className="font-bold text-roman-navy">Regla RN-01:</strong> Un diseñador
+                revisará tu archivo y recibirás una prueba visual oficial para aprobar antes de
+                imprimir.
               </p>
             </div>
           </div>
 
           {/* Right Column: Customization Controls */}
-          <div className="lg:col-span-7 space-y-5">
-            
+          <div className="space-y-5 lg:col-span-7">
             {/* Custom Text Input */}
             <div className="space-y-2">
-              <label className="text-xs font-headline font-bold text-roman-navy uppercase tracking-wider flex items-center gap-2">
-                <Type className="w-4 h-4 text-roman-bronze" />
+              <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                <Type className="h-4 w-4 text-roman-bronze" />
                 Texto o Nombre Deseado:
               </label>
               <input
                 type="text"
                 value={customText}
-                onChange={(e) => setCustomText(e.target.value)}
+                onChange={e => setCustomText(e.target.value)}
                 placeholder="Ej. GUERRERO ROMÁN / Papá #1"
-                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-roman-bronze shadow-sm"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-800 shadow-sm focus:border-roman-bronze focus:outline-none"
               />
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-[11px] text-slate-500 font-medium">Color de texto:</span>
-                {['#D4AF37', '#0D1B2A', '#C5A059', '#000000', '#E63946'].map((c) => (
+                <span className="text-[11px] font-medium text-slate-500">Color de texto:</span>
+                {['#D4AF37', '#0D1B2A', '#C5A059', '#000000', '#E63946'].map(c => (
                   <button
                     key={c}
                     onClick={() => setTextColor(c)}
                     style={{ backgroundColor: c }}
-                    className={`w-5 h-5 rounded-full border ${textColor === c ? 'ring-2 ring-roman-bronze' : ''}`}
+                    className={`h-5 w-5 rounded-full border ${textColor === c ? 'ring-2 ring-roman-bronze' : ''}`}
                   />
                 ))}
               </div>
@@ -297,8 +306,8 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
             {/* Campo de Teléfono Obligatorio */}
             <div className="space-y-2">
-              <label className="text-xs font-headline font-bold text-roman-navy uppercase tracking-wider flex items-center gap-2">
-                <Phone className="w-4 h-4 text-roman-bronze" />
+              <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                <Phone className="h-4 w-4 text-roman-bronze" />
                 Teléfono de Contacto: <span className="text-red-500">*</span>
               </label>
               <input
@@ -306,20 +315,20 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 type="tel"
                 required
                 value={telefono}
-                onChange={(e) => {
-                  setTelefono(e.target.value);
-                  if (errorTelefono) setErrorTelefono('');
+                onChange={e => {
+                  setTelefono(e.target.value)
+                  if (errorTelefono) setErrorTelefono('')
                 }}
                 placeholder="Ej. +52 614 123 4567"
-                className={`w-full bg-white border rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none shadow-sm transition-colors ${
+                className={`w-full rounded-xl border bg-white px-4 py-2.5 text-xs text-slate-800 shadow-sm transition-colors focus:outline-none ${
                   errorTelefono
-                    ? 'border-red-400 focus:border-red-500 bg-red-50/30'
+                    ? 'border-red-400 bg-red-50/30 focus:border-red-500'
                     : 'border-slate-300 focus:border-roman-bronze'
                 }`}
               />
               {errorTelefono && (
-                <p className="text-[11px] font-semibold text-red-600 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
+                <p className="flex items-center gap-1 text-[11px] font-semibold text-red-600">
+                  <AlertTriangle className="h-3 w-3" />
                   {errorTelefono}
                 </p>
               )}
@@ -328,41 +337,48 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
             {/* File Upload Section (Firebase Storage Mock) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-headline font-bold text-roman-navy uppercase tracking-wider flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-roman-bronze" />
+                <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                  <Upload className="h-4 w-4 text-roman-bronze" />
                   Adjuntar Logotipo o Referencia de Diseño (Firebase Storage):
                 </label>
                 {errorArchivo && (
-                  <span className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                  <span className="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-600">
                     {errorArchivo}
                   </span>
                 )}
               </div>
-              
-              <div className="relative border-2 border-dashed border-slate-300 hover:border-roman-bronze rounded-xl p-4 text-center bg-white transition-colors shadow-sm">
+
+              <div className="relative rounded-xl border-2 border-dashed border-slate-300 bg-white p-4 text-center shadow-sm transition-colors hover:border-roman-bronze">
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png,.pdf,.ai,.psd"
                   onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 />
-                
+
                 {uploading ? (
                   <div className="space-y-2 py-2">
-                    <p className="text-xs font-bold text-roman-navy">Subiendo archivo a Firebase Storage... {uploadProgress}%</p>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div className="bg-roman-bronze h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                    <p className="text-xs font-bold text-roman-navy">
+                      Subiendo archivo a Firebase Storage... {uploadProgress}%
+                    </p>
+                    <div className="h-2 w-full rounded-full bg-slate-200">
+                      <div
+                        className="h-2 rounded-full bg-roman-bronze transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
                     </div>
                   </div>
                 ) : fileName ? (
-                  <div className="flex items-center justify-center gap-2 text-emerald-700 py-1 text-xs font-bold">
-                    <FileCheck className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-2 py-1 text-xs font-bold text-emerald-700">
+                    <FileCheck className="h-4 w-4" />
                     <span>Archivo subido: {fileName}</span>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <ImageIcon className="w-6 h-6 text-slate-400 mx-auto" />
-                    <p className="text-xs text-slate-700 font-semibold">Haz clic o arrastra tu archivo (JPG, PNG, PDF, AI, PSD)</p>
+                    <ImageIcon className="mx-auto h-6 w-6 text-slate-400" />
+                    <p className="text-xs font-semibold text-slate-700">
+                      Haz clic o arrastra tu archivo (JPG, PNG, PDF, AI, PSD)
+                    </p>
                     <p className="text-[10px] text-slate-500">Soporta alta resolución hasta 50MB</p>
                   </div>
                 )}
@@ -371,28 +387,33 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
             {/* Specifications: Size & Quantity */}
             <div className="grid grid-cols-2 gap-4">
-              
               {product.type === 'playera' ? (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-headline font-bold text-roman-navy uppercase">Talla:</label>
+                  <label className="font-headline text-xs font-bold uppercase text-roman-navy">
+                    Talla:
+                  </label>
                   <select
                     value={selectedSize}
-                    onChange={(e) => setSelectedSize(e.target.value)}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-roman-bronze shadow-sm"
+                    onChange={e => setSelectedSize(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 shadow-sm focus:border-roman-bronze focus:outline-none"
                   >
-                    {['CH', 'M', 'G', 'XG', 'XXG'].map((s) => (
-                      <option key={s} value={s}>{s}</option>
+                    {['CH', 'M', 'G', 'XG', 'XXG'].map(s => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
                     ))}
                   </select>
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-headline font-bold text-roman-navy uppercase">Estilo / Variantes:</label>
+                  <label className="font-headline text-xs font-bold uppercase text-roman-navy">
+                    Estilo / Variantes:
+                  </label>
                   <input
                     type="text"
                     disabled
                     value={product.material.split(' ')[0] || 'Estándar'}
-                    className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-600 font-medium"
+                    className="w-full rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600"
                   />
                 </div>
               )}
@@ -400,71 +421,74 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
               {/* Quantity */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-headline font-bold text-roman-navy uppercase">Cantidad:</label>
+                  <label className="font-headline text-xs font-bold uppercase text-roman-navy">
+                    Cantidad:
+                  </label>
                   {errorCantidad && (
-                    <span className="text-[11px] font-semibold text-red-600">
-                      {errorCantidad}
-                    </span>
+                    <span className="text-[11px] font-semibold text-red-600">{errorCantidad}</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      const next = quantity - 1;
+                      const next = quantity - 1
                       if (next < 1) {
-                        setErrorCantidad('Cantidad mínima 1');
-                        setQuantity(0);
+                        setErrorCantidad('Cantidad mínima 1')
+                        setQuantity(0)
                       } else {
-                        setErrorCantidad('');
-                        setQuantity(next);
+                        setErrorCantidad('')
+                        setQuantity(next)
                       }
                     }}
-                    className="px-3 py-1.5 bg-slate-200 rounded-lg text-slate-800 font-bold hover:bg-slate-300"
+                    className="rounded-lg bg-slate-200 px-3 py-1.5 font-bold text-slate-800 hover:bg-slate-300"
                   >
                     -
                   </button>
-                  <span className="font-bold text-sm text-slate-900 w-8 text-center">{quantity}</span>
+                  <span className="w-8 text-center text-sm font-bold text-slate-900">
+                    {quantity}
+                  </span>
                   <button
                     onClick={() => {
-                      setErrorCantidad('');
-                      setQuantity(quantity + 1);
+                      setErrorCantidad('')
+                      setQuantity(quantity + 1)
                     }}
-                    className="px-3 py-1.5 bg-slate-200 rounded-lg text-slate-800 font-bold hover:bg-slate-300"
+                    className="rounded-lg bg-slate-200 px-3 py-1.5 font-bold text-slate-800 hover:bg-slate-300"
                   >
                     +
                   </button>
                 </div>
               </div>
-
             </div>
 
             {/* Additional Notes */}
             <div className="space-y-1.5">
-              <label className="text-xs font-headline font-bold text-roman-navy uppercase">Instrucciones Especiales:</label>
+              <label className="font-headline text-xs font-bold uppercase text-roman-navy">
+                Instrucciones Especiales:
+              </label>
               <textarea
                 rows={2}
                 value={additionalNotes}
-                onChange={(e) => setAdditionalNotes(e.target.value)}
+                onChange={e => setAdditionalNotes(e.target.value)}
                 placeholder="Ej. Ubicar el logo centrado, fuentes estilo romano..."
-                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-roman-bronze shadow-sm"
+                className="w-full rounded-xl border border-slate-300 bg-white p-3 text-xs text-slate-800 shadow-sm focus:border-roman-bronze focus:outline-none"
               />
             </div>
 
             {/* Price Quote Estimator */}
-            <div className="p-4 rounded-xl bg-roman-navy text-white space-y-2 border border-roman-bronze/40 shadow-md">
+            <div className="space-y-2 rounded-xl border border-roman-bronze/40 bg-roman-navy p-4 text-white shadow-md">
               <div className="flex items-center justify-between text-xs text-slate-300">
                 <span>Precio Unitario Base:</span>
                 <span>${unitPrice} MXN</span>
               </div>
               {quantityDiscount > 0 && (
-                <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                <div className="flex items-center justify-between text-xs font-semibold text-emerald-400">
                   <span>Descuento por Volumen ({quantityDiscount * 100}%):</span>
                   <span>-${descuento} MXN</span>
                 </div>
               )}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-700 font-cinzel">
-                <span className="font-bold text-xs uppercase">Cotización Estimada Total:</span>
-                <span className="font-black text-2xl text-roman-gold">${totalPrice} MXN</span>
+              <div className="flex items-center justify-between border-t border-slate-700 pt-2 font-cinzel">
+                <span className="text-xs font-bold uppercase">Cotización Estimada Total:</span>
+                <span className="text-2xl font-black text-roman-gold">${totalPrice} MXN</span>
               </div>
             </div>
 
@@ -472,21 +496,18 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
             <button
               onClick={handleAddToCartSubmit}
               disabled={quantity < 1 || !!errorArchivo || !telefono.trim()}
-              className={`w-full py-4 rounded-xl text-xs font-headline tracking-widest uppercase flex items-center justify-center gap-2 transition-all ${
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-4 font-headline text-xs uppercase tracking-widest transition-all ${
                 quantity < 1 || !!errorArchivo || !telefono.trim()
-                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
+                  ? 'cursor-not-allowed bg-slate-300 text-slate-500 opacity-60'
                   : 'btn-relief-gold'
               }`}
             >
-              <ShoppingCart className="w-4 h-4 text-roman-navy" />
+              <ShoppingCart className="h-4 w-4 text-roman-navy" />
               <span>AGREGAR AL CARRITO DE COMPRAS</span>
             </button>
-
           </div>
-
         </div>
-
       </div>
     </div>
-  );
+  )
 }

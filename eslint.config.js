@@ -44,8 +44,8 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // ── React General ────────────────────
-      'react/prop-types': 'warn',              // warn para migración progresiva
-      'react/react-in-jsx-scope': 'off',       // No necesario en React 17+
+      'react/prop-types': 'warn', // warn para migración progresiva
+      'react/react-in-jsx-scope': 'off', // No necesario en React 17+
       'react/jsx-uses-react': 'off',
       'react/jsx-uses-vars': 'error',
       'react/no-unused-state': 'warn',
@@ -59,7 +59,7 @@ export default [
       'no-debugger': 'error',
       'no-duplicate-imports': 'error',
       'prefer-const': 'error',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
       'no-var': 'error',
       'object-shorthand': 'warn',
       'prefer-arrow-callback': 'warn',
@@ -103,9 +103,9 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
       'react/jsx-uses-vars': 'error',
-      'react/prop-types': 'off',   // No requerido en archivos de test
+      'react/prop-types': 'off', // No requerido en archivos de test
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_|React' }],
-      'no-console': 'off',         // Permitido en tests para debug
+      'no-console': 'off', // Permitido en tests para debug
     },
   },
 

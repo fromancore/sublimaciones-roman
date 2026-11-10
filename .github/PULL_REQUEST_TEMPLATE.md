@@ -2,9 +2,12 @@
 
 <!-- Describe los cambios que introduces en este PR -->
 
+**Rama base:** `main`
+
 ## 🔗 Issue Relacionado
 
 <!-- Vincula el issue que este PR resuelve -->
+
 Closes #<!-- número del issue -->
 
 ## 🧩 Tipo de Cambio
@@ -23,31 +26,35 @@ Closes #<!-- número del issue -->
 ## ✅ Checklist
 
 ### Código
+
 - [ ] El código sigue las convenciones del proyecto (ESLint + Prettier)
 - [ ] Se realizaron auto-revisiones del código propio
 - [ ] Se comentaron las partes complejas o no obvias del código
 - [ ] No se dejaron `console.log()` de depuración
 
 ### Pruebas
+
 - [ ] Se agregaron pruebas que verifican la funcionalidad
 - [ ] Todas las pruebas existentes pasan (`npm run test`)
 - [ ] La cobertura de código no disminuyó
 
 ### Documentación
+
 - [ ] Se actualizó la documentación si fue necesario
 - [ ] Se actualizó el `CHANGELOG.md` si aplica
 
 ### Calidad
+
 - [ ] El título del PR sigue la convención de Conventional Commits
 - [ ] Los commits siguen la convención de Conventional Commits
-- [ ] No hay conflictos de merge con `develop`
+- [ ] La rama está actualizada con `main` y no tiene conflictos
 
 ## 📸 Capturas de Pantalla
 
 <!-- Si hay cambios visuales, incluye capturas de pantalla del antes/después -->
 
 | Antes | Después |
-|-------|---------|
+| ----- | ------- |
 |       |         |
 
 ## 📝 Notas para el Revisor

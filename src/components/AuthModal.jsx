@@ -37,65 +37,66 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
   if (!isOpen) return null
 
   // Cálculo de fortaleza de contraseña
-  const calcularFortaleza = (pwd) => {
-    if (!pwd) return { nivel: 0, etiqueta: '', color: 'bg-slate-200' };
-    let score = 0;
-    if (pwd.length >= 8) score += 1;
-    if (/[A-Z]/.test(pwd)) score += 1;
-    if (/[0-9]/.test(pwd)) score += 1;
-    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+  const calcularFortaleza = pwd => {
+    if (!pwd) return { nivel: 0, etiqueta: '', color: 'bg-slate-200' }
+    let score = 0
+    if (pwd.length >= 8) score += 1
+    if (/[A-Z]/.test(pwd)) score += 1
+    if (/[0-9]/.test(pwd)) score += 1
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1
 
-    if (score <= 1) return { nivel: 1, etiqueta: 'Débil', color: 'bg-rose-500', width: 'w-1/3' };
-    if (score === 2 || score === 3) return { nivel: 2, etiqueta: 'Media', color: 'bg-amber-500', width: 'w-2/3' };
-    return { nivel: 3, etiqueta: 'Fuerte', color: 'bg-emerald-500', width: 'w-full' };
-  };
+    if (score <= 1) return { nivel: 1, etiqueta: 'Débil', color: 'bg-rose-500', width: 'w-1/3' }
+    if (score === 2 || score === 3)
+      return { nivel: 2, etiqueta: 'Media', color: 'bg-amber-500', width: 'w-2/3' }
+    return { nivel: 3, etiqueta: 'Fuerte', color: 'bg-emerald-500', width: 'w-full' }
+  }
 
-  const fortaleza = calcularFortaleza(password);
+  const fortaleza = calcularFortaleza(password)
 
   const validarFormulario = () => {
-    const nuevosErrores = {};
+    const nuevosErrores = {}
 
     // Correo: formato válido
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!email || !regexEmail.test(email.trim())) {
-      nuevosErrores.email = 'Ingresa un correo válido';
+      nuevosErrores.email = 'Ingresa un correo válido'
     }
 
     if (modo === 'registro') {
       // Nombre
       if (!nombre.trim()) {
-        nuevosErrores.nombre = 'El nombre es requerido';
+        nuevosErrores.nombre = 'El nombre es requerido'
       }
 
       // Teléfono: exactamente 10 dígitos sin espacios
-      const regexTelefono = /^\d{10}$/;
+      const regexTelefono = /^\d{10}$/
       if (!telefono || !regexTelefono.test(telefono.trim())) {
-        nuevosErrores.telefono = 'Escribe 10 dígitos, sin espacios';
+        nuevosErrores.telefono = 'Escribe 10 dígitos, sin espacios'
       }
 
       // Contraseña: mínimo 8 caracteres
       if (!password || password.length < 8) {
-        nuevosErrores.password = 'Usa al menos 8 caracteres';
+        nuevosErrores.password = 'Usa al menos 8 caracteres'
       }
     } else {
       // Login
       if (!password) {
-        nuevosErrores.password = 'Ingresa tu contraseña';
+        nuevosErrores.password = 'Ingresa tu contraseña'
       }
     }
 
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  };
+    setErrores(nuevosErrores)
+    return Object.keys(nuevosErrores).length === 0
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorGeneral('');
-    setMensajeExito('');
+  const handleSubmit = async e => {
+    e.preventDefault()
+    setErrorGeneral('')
+    setMensajeExito('')
 
-    if (!validarFormulario()) return;
+    if (!validarFormulario()) return
 
-    const hash = await generarHashContrasena(password);
+    const hash = await generarHashContrasena(password)
 
     if (modo === 'registro') {
       const nuevoUsuario = {
@@ -105,56 +106,57 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
         telefono: telefono.trim(),
         role: 'cliente',
         passwordHash: hash, // Nunca guardamos texto plano
-        fechaRegistro: new Date().toISOString()
-      };
+        fechaRegistro: new Date().toISOString(),
+      }
 
-      setMensajeExito('¡Cuenta creada exitosamente! Bienvenido a Sublimaciones Román.');
+      setMensajeExito('¡Cuenta creada exitosamente! Bienvenido a Sublimaciones Román.')
       setTimeout(() => {
-        onLoginExitoso(nuevoUsuario);
-        onClose();
-      }, 1200);
+        onLoginExitoso(nuevoUsuario)
+        onClose()
+      }, 1200)
     } else {
       // Modo login simulado
       const usuarioExistente = USUARIOS_INICIALES.find(
         u => u.email.toLowerCase() === email.trim().toLowerCase()
-      );
+      )
 
-      const usuarioLogueado = usuarioExistente ? {
-        ...usuarioExistente,
-        passwordHash: hash
-      } : {
-        id: `usr-${Date.now()}`,
-        nombre: email.split('@')[0],
-        email: email.trim().toLowerCase(),
-        role: email.includes('admin') ? 'admin' : 'cliente',
-        passwordHash: hash
-      };
+      const usuarioLogueado = usuarioExistente
+        ? {
+            ...usuarioExistente,
+            passwordHash: hash,
+          }
+        : {
+            id: `usr-${Date.now()}`,
+            nombre: email.split('@')[0],
+            email: email.trim().toLowerCase(),
+            role: email.includes('admin') ? 'admin' : 'cliente',
+            passwordHash: hash,
+          }
 
-      setMensajeExito('¡Sesión iniciada con éxito!');
+      setMensajeExito('¡Sesión iniciada con éxito!')
       setTimeout(() => {
-        onLoginExitoso(usuarioLogueado);
-        onClose();
-      }, 1000);
+        onLoginExitoso(usuarioLogueado)
+        onClose()
+      }, 1000)
     }
-  };
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-roman-navy/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-      <div className="relative w-full max-w-md bg-white border-2 border-roman-bronze rounded-2xl shadow-2xl overflow-hidden">
-        
+    <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-roman-navy/80 p-4 backdrop-blur-md">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-roman-bronze bg-white shadow-2xl">
         {/* Encabezado */}
-        <div className="px-6 py-5 bg-roman-navy text-white flex items-center justify-between border-b border-roman-bronze/40">
+        <div className="flex items-center justify-between border-b border-roman-bronze/40 bg-roman-navy px-6 py-5 text-white">
           <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-5 h-5 text-roman-gold" />
-            <h3 className="font-cinzel font-bold text-base tracking-wider text-white">
+            <ShieldCheck className="h-5 w-5 text-roman-gold" />
+            <h3 className="font-cinzel text-base font-bold tracking-wider text-white">
               {modo === 'registro' ? 'Crear Cuenta' : 'Iniciar Sesión'}
             </h3>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -162,10 +164,14 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
         <div className="flex border-b border-slate-200 bg-roman-stone">
           <button
             type="button"
-            onClick={() => { setModo('registro'); setErrores({}); setErrorGeneral(''); }}
-            className={`flex-1 py-3 text-xs font-headline font-bold uppercase tracking-wider transition-colors ${
+            onClick={() => {
+              setModo('registro')
+              setErrores({})
+              setErrorGeneral('')
+            }}
+            className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'registro'
-                ? 'bg-white text-roman-navy border-b-2 border-roman-gold'
+                ? 'border-b-2 border-roman-gold bg-white text-roman-navy'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -173,10 +179,14 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
           </button>
           <button
             type="button"
-            onClick={() => { setModo('login'); setErrores({}); setErrorGeneral(''); }}
-            className={`flex-1 py-3 text-xs font-headline font-bold uppercase tracking-wider transition-colors ${
+            onClick={() => {
+              setModo('login')
+              setErrores({})
+              setErrorGeneral('')
+            }}
+            className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'login'
-                ? 'bg-white text-roman-navy border-b-2 border-roman-gold'
+                ? 'border-b-2 border-roman-gold bg-white text-roman-navy'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -186,19 +196,18 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
 
         {/* Mensaje de éxito */}
         {mensajeExito && (
-          <div className="m-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-medium flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="m-6 flex items-center gap-2.5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-xs font-medium text-emerald-800">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
             <p>{mensajeExito}</p>
           </div>
         )}
 
         {/* Formulario */}
         {!mensajeExito && (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            
+          <form onSubmit={handleSubmit} className="space-y-4 p-6">
             {errorGeneral && (
-              <div className="p-3 rounded-lg bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="flex items-center gap-2 rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs text-rose-800">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
                 <span>{errorGeneral}</span>
               </div>
             )}
@@ -206,50 +215,50 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
             {/* Nombre (solo registro) */}
             {modo === 'registro' && (
               <div className="space-y-1">
-                <label className="text-xs font-headline font-bold text-roman-navy uppercase flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-roman-bronze" />
+                <label className="flex items-center gap-1.5 font-headline text-xs font-bold uppercase text-roman-navy">
+                  <User className="h-3.5 w-3.5 text-roman-bronze" />
                   Nombre Completo:
                 </label>
                 <input
                   type="text"
                   placeholder="Ej. Carlos Mendiburu"
                   value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  className={`w-full bg-roman-stone border ${
+                  onChange={e => setNombre(e.target.value)}
+                  className={`w-full border bg-roman-stone ${
                     errores.nombre ? 'border-rose-400' : 'border-slate-300'
-                  } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-roman-bronze`}
+                  } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-roman-bronze focus:outline-none`}
                 />
                 {errores.nombre && (
-                  <p className="text-[11px] text-rose-600 font-semibold">{errores.nombre}</p>
+                  <p className="text-[11px] font-semibold text-rose-600">{errores.nombre}</p>
                 )}
               </div>
             )}
 
             {/* Correo Electrónico */}
             <div className="space-y-1">
-              <label className="text-xs font-headline font-bold text-roman-navy uppercase flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-roman-bronze" />
+              <label className="flex items-center gap-1.5 font-headline text-xs font-bold uppercase text-roman-navy">
+                <Mail className="h-3.5 w-3.5 text-roman-bronze" />
                 Correo Electrónico:
               </label>
               <input
                 type="email"
                 placeholder="ejemplo@correo.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full bg-roman-stone border ${
+                onChange={e => setEmail(e.target.value)}
+                className={`w-full border bg-roman-stone ${
                   errores.email ? 'border-rose-400' : 'border-slate-300'
-                } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-roman-bronze`}
+                } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-roman-bronze focus:outline-none`}
               />
               {errores.email && (
-                <p className="text-[11px] text-rose-600 font-semibold">{errores.email}</p>
+                <p className="text-[11px] font-semibold text-rose-600">{errores.email}</p>
               )}
             </div>
 
             {/* Teléfono (solo registro) */}
             {modo === 'registro' && (
               <div className="space-y-1">
-                <label className="text-xs font-headline font-bold text-roman-navy uppercase flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-roman-bronze" />
+                <label className="flex items-center gap-1.5 font-headline text-xs font-bold uppercase text-roman-navy">
+                  <Phone className="h-3.5 w-3.5 text-roman-bronze" />
                   Teléfono (10 dígitos):
                 </label>
                 <input
@@ -257,65 +266,66 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
                   placeholder="9371234567"
                   maxLength={10}
                   value={telefono}
-                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
-                  className={`w-full bg-roman-stone border ${
+                  onChange={e => setTelefono(e.target.value.replace(/\D/g, ''))}
+                  className={`w-full border bg-roman-stone ${
                     errores.telefono ? 'border-rose-400' : 'border-slate-300'
-                  } rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono focus:outline-none focus:border-roman-bronze`}
+                  } rounded-xl px-3.5 py-2 font-mono text-xs text-slate-900 focus:border-roman-bronze focus:outline-none`}
                 />
                 {errores.telefono && (
-                  <p className="text-[11px] text-rose-600 font-semibold">{errores.telefono}</p>
+                  <p className="text-[11px] font-semibold text-rose-600">{errores.telefono}</p>
                 )}
               </div>
             )}
 
             {/* Contraseña */}
             <div className="space-y-1">
-              <label className="text-xs font-headline font-bold text-roman-navy uppercase flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-roman-bronze" />
+              <label className="flex items-center gap-1.5 font-headline text-xs font-bold uppercase text-roman-navy">
+                <Lock className="h-3.5 w-3.5 text-roman-bronze" />
                 Contraseña:
               </label>
               <input
                 type="password"
                 placeholder="Mínimo 8 caracteres"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full bg-roman-stone border ${
+                onChange={e => setPassword(e.target.value)}
+                className={`w-full border bg-roman-stone ${
                   errores.password ? 'border-rose-400' : 'border-slate-300'
-                } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-roman-bronze`}
+                } rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-roman-bronze focus:outline-none`}
               />
               {errores.password && (
-                <p className="text-[11px] text-rose-600 font-semibold">{errores.password}</p>
+                <p className="text-[11px] font-semibold text-rose-600">{errores.password}</p>
               )}
 
               {/* Indicador de fortaleza (solo registro) */}
               {modo === 'registro' && password && (
-                <div className="pt-1.5 space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+                <div className="space-y-1 pt-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500">
                     <span>Fortaleza de contraseña:</span>
                     <span className="font-bold text-roman-navy">{fortaleza.etiqueta}</span>
                   </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div className={`h-full ${fortaleza.color} ${fortaleza.width} transition-all duration-300`}></div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className={`h-full ${fortaleza.color} ${fortaleza.width} transition-all duration-300`}
+                    />
                   </div>
                 </div>
               )}
             </div>
 
-            <p className="text-[10px] text-slate-400 pt-1 leading-tight">
+            <p className="pt-1 text-[10px] leading-tight text-slate-400">
               🔒 Tus credenciales son protegidas con cifrado hash y nunca se guardan en texto plano.
             </p>
 
             {/* Botón de envío */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl btn-relief-gold text-xs font-headline font-bold uppercase tracking-wider mt-4"
+              className="btn-relief-gold mt-4 w-full rounded-xl py-3.5 font-headline text-xs font-bold uppercase tracking-wider"
             >
               {modo === 'registro' ? 'Crear Mi Cuenta' : 'Acceder al Portal'}
             </button>
           </form>
         )}
-
       </div>
     </div>
-  );
+  )
 }
