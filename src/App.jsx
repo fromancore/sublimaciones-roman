@@ -130,7 +130,13 @@ export default function App() {
         activeOrdersCount={orders.length}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         currentUser={currentUser}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={() => {
+          setCurrentUser(null);
+          setCurrentRole('cliente');
+          if (activeTab === 'dashboard') {
+            setActiveTab('inicio');
+          }
+        }}
       />
 
       {/* Main Content Area based on activeTab */}
@@ -181,7 +187,7 @@ export default function App() {
             setPagos={setPagos}
             incidencias={incidencias}
             setIncidencias={setIncidencias}
-            currentUser={currentUser || { role: currentRole, nombre: `Operador (${currentRole})` }}
+            currentUser={currentUser}
           />
         )}
       </main>

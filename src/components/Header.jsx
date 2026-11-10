@@ -122,44 +122,46 @@ export default function Header({
                 </button>
               )}
 
-              {/* Selector de Rol: HERRAMIENTA DE DEMOSTRACIÓN */}
-              <div className="relative">
-                <button
-                  onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-roman-dark border border-roman-bronze/30 text-xs font-semibold text-slate-300 hover:border-roman-gold transition-all"
-                  title="Herramienta de demostración: Simular Rol"
-                >
-                  <span className="text-[10px] uppercase font-bold text-roman-bronze tracking-wider hidden md:inline">Demo:</span>
-                  <span className="hidden sm:inline font-mono text-[11px]">{roleLabels[currentRole]}</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" title="Herramienta de demostración activa"></span>
-                </button>
+              {/* Selector de Rol: HERRAMIENTA DE DEMOSTRACIÓN (Exclusivo Administrador) */}
+              {currentUser?.role === 'admin' && (
+                <div className="relative">
+                  <button
+                    onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-roman-dark border border-roman-bronze/30 text-xs font-semibold text-slate-300 hover:border-roman-gold transition-all"
+                    title="Herramienta de demostración: Simular Rol"
+                  >
+                    <span className="text-[10px] uppercase font-bold text-roman-bronze tracking-wider hidden md:inline">Demo:</span>
+                    <span className="hidden sm:inline font-mono text-[11px]">{roleLabels[currentRole]}</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" title="Herramienta de demostración activa"></span>
+                  </button>
 
-                {roleMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-roman-navy border border-roman-bronze/50 rounded-xl shadow-2xl py-2 z-50">
-                    <div className="px-3 py-1 text-[10px] font-bold text-roman-gold uppercase tracking-wider border-b border-slate-700/60 mb-1">
-                      🛠️ Herramienta de Demostración (Simular Rol)
+                  {roleMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-roman-navy border border-roman-bronze/50 rounded-xl shadow-2xl py-2 z-50">
+                      <div className="px-3 py-1 text-[10px] font-bold text-roman-gold uppercase tracking-wider border-b border-slate-700/60 mb-1">
+                        🛠️ Herramienta de Demostración (Simular Rol)
+                      </div>
+                      {Object.entries(roleLabels).map(([roleKey, label]) => (
+                        <button
+                          key={roleKey}
+                          onClick={() => {
+                            setCurrentRole(roleKey);
+                            setRoleMenuOpen(false);
+                            if (roleKey !== 'cliente') setActiveTab('dashboard');
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs font-medium flex items-center justify-between transition-colors ${
+                            currentRole === roleKey 
+                              ? 'bg-roman-dark text-roman-gold font-bold border-l-2 border-roman-gold' 
+                              : 'text-slate-300 hover:bg-slate-800'
+                          }`}
+                        >
+                          {label}
+                          {currentRole === roleKey && <span>✓</span>}
+                        </button>
+                      ))}
                     </div>
-                    {Object.entries(roleLabels).map(([roleKey, label]) => (
-                      <button
-                        key={roleKey}
-                        onClick={() => {
-                          setCurrentRole(roleKey);
-                          setRoleMenuOpen(false);
-                          if (roleKey !== 'cliente') setActiveTab('dashboard');
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium flex items-center justify-between transition-colors ${
-                          currentRole === roleKey 
-                            ? 'bg-roman-dark text-roman-gold font-bold border-l-2 border-roman-gold' 
-                            : 'text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        {label}
-                        {currentRole === roleKey && <span>✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* Shopping Cart Button */}
               <button

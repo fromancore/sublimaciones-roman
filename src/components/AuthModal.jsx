@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { USUARIOS_INICIALES } from '../services/datos.js';
 
 /**
  * Función utilitaria para hashear contraseñas con SHA-256 (nunca texto plano)
@@ -112,7 +113,14 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
       }, 1200);
     } else {
       // Modo login simulado
-      const usuarioLogueado = {
+      const usuarioExistente = USUARIOS_INICIALES.find(
+        u => u.email.toLowerCase() === email.trim().toLowerCase()
+      );
+
+      const usuarioLogueado = usuarioExistente ? {
+        ...usuarioExistente,
+        passwordHash: hash
+      } : {
         id: `usr-${Date.now()}`,
         nombre: email.split('@')[0],
         email: email.trim().toLowerCase(),

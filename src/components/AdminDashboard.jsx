@@ -33,7 +33,7 @@ export default function AdminDashboard({
   setPagos,
   incidencias = [],
   setIncidencias,
-  currentUser = { role: 'admin', nombre: 'Administrador General' }
+  currentUser = null
 }) {
   // Tab states for Admin view
   const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'pagos', 'descuentos', 'catalog'
@@ -434,26 +434,29 @@ export default function AdminDashboard({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { id: 'admin', label: '👑 Admin' },
-              { id: 'disenador', label: '🎨 Diseñador' },
-              { id: 'produccion', label: '🖨️ Producción (RN-01)' },
-              { id: 'entregas', label: '🚚 Entregas Mérida' }
-            ].map((r) => (
-              <button
-                key={r.id}
-                onClick={() => setCurrentRole(r.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-headline font-bold uppercase transition-all ${
-                  currentRole === r.id 
-                    ? 'btn-relief-navy text-white shadow-md' 
-                    : 'bg-roman-stone text-slate-600 border border-slate-300 hover:text-slate-900'
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
+          {/* Barra de Simulación de Roles (Exclusivo Administrador) */}
+          {currentUser?.role === 'admin' && (
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { id: 'admin', label: '👑 Admin' },
+                { id: 'disenador', label: '🎨 Diseñador' },
+                { id: 'produccion', label: '🖨️ Producción (RN-01)' },
+                { id: 'entregas', label: '🚚 Entregas Mérida' }
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => setCurrentRole(r.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-headline font-bold uppercase transition-all ${
+                    currentRole === r.id 
+                      ? 'btn-relief-navy text-white shadow-md' 
+                      : 'bg-roman-stone text-slate-600 border border-slate-300 hover:text-slate-900'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ADMIN METRICS SUMMARY (Solo en Vista Admin) */}
