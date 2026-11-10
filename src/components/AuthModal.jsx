@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
-import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
-import { USUARIOS_INICIALES } from '../services/datos.js';
+import { useState } from 'react'
+import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react'
+import { USUARIOS_INICIALES } from '../services/datos.js'
 
 /**
  * Función utilitaria para hashear contraseñas con SHA-256 (nunca texto plano)
  */
 async function generarHashContrasena(contrasena) {
   try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(contrasena);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const encoder = new TextEncoder()
+    const data = encoder.encode(contrasena)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
   } catch {
     // Fallback simple si crypto.subtle no está disponible
-    return btoa(contrasena).split('').reverse().join('');
+    return btoa(contrasena).split('').reverse().join('')
   }
 }
 
 export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser }) {
-  if (!isOpen) return null;
+  // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
+  const [modo, setModo] = useState('registro') // 'registro' | 'login'
 
-  const [modo, setModo] = useState('registro'); // 'registro' | 'login'
-  
   // Campos del formulario
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [password, setPassword] = useState('');
-  
+  const [nombre, setNombre] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [password, setPassword] = useState('')
+
   // Errores de validación junto al campo
-  const [errores, setErrores] = useState({});
-  const [mensajeExito, setMensajeExito] = useState('');
-  const [errorGeneral, setErrorGeneral] = useState('');
+  const [errores, setErrores] = useState({})
+  const [mensajeExito, setMensajeExito] = useState('')
+  const [errorGeneral, setErrorGeneral] = useState('')
+
+  // Early return después de los hooks
+  if (!isOpen) return null
 
   // Cálculo de fortaleza de contraseña
   const calcularFortaleza = (pwd) => {

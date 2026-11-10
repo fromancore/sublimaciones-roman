@@ -1,34 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon, Type, Shield, FileCheck, ShoppingCart, Columns, Phone } from 'lucide-react';
-import { cotizar } from '../services/cotizacion.js';
+import { useState, useRef, useEffect } from 'react'
+import { X, Upload, Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon, Type, Shield, FileCheck, ShoppingCart, Columns, Phone } from 'lucide-react'
+import { cotizar } from '../services/cotizacion.js'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
-  if (!product) return null;
+  // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
 
   // Customizer State
-  const [customText, setCustomText] = useState('GUERRERO ROMÁN');
-  const [textColor, setTextColor] = useState('#D4AF37'); // Roman Gold
-  const [fontSize, setFontSize] = useState(22);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [fileName, setFileName] = useState('');
-  
+  const [customText, setCustomText] = useState('GUERRERO ROMÁN')
+  const [textColor, setTextColor] = useState('#D4AF37') // Roman Gold
+  const [fontSize, setFontSize] = useState(22)
+  const [uploadedImage, setUploadedImage] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [fileName, setFileName] = useState('')
+
   // Campo de teléfono obligatorio
-  const [telefono, setTelefono] = useState('');
+  const [telefono, setTelefono] = useState('')
 
   // Validaciones
-  const [errorArchivo, setErrorArchivo] = useState('');
-  const [errorCantidad, setErrorCantidad] = useState('');
-  const [errorTelefono, setErrorTelefono] = useState('');
+  const [errorArchivo, setErrorArchivo] = useState('')
+  const [errorCantidad, setErrorCantidad] = useState('')
+  const [errorTelefono, setErrorTelefono] = useState('')
 
   // Specifications
-  const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '#FFFFFF');
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [additionalNotes, setAdditionalNotes] = useState('');
+  const [quantity, setQuantity] = useState(1)
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || '#FFFFFF')
+  const [selectedSize, setSelectedSize] = useState('M')
+  const [additionalNotes, setAdditionalNotes] = useState('')
 
-  const canvasRef = useRef(null);
+  const canvasRef = useRef(null)
+
+  // Early return después de los hooks
+  if (!product) return null
 
   // Price Calculation mediante servicio cotizacion.js
   const cotizacionResultado = cotizar(product.price, quantity);

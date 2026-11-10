@@ -1,23 +1,27 @@
-import React, { useState } from 'react';
-import { X, CreditCard, Upload, CheckCircle2, DollarSign, Shield, FileCheck, ArrowRight } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { useState } from 'react'
+import { X, CreditCard, Upload, CheckCircle2, FileCheck, ArrowRight } from 'lucide-react'
+import confetti from 'canvas-confetti'
 
 export default function PaymentModal({ order, onClose, onRegisterPayment }) {
-  if (!order) return null;
+  // ⚠️ Todos los hooks deben declararse antes de cualquier return condicional
+  // (Regla de Hooks de React — react-hooks/rules-of-hooks)
+  const [paymentOption, setPaymentOption] = useState('deposit') // 'deposit' (50%) or 'full' (100%)
+  const [paymentMethod, setPaymentMethod] = useState('transfer') // 'transfer', 'oxxo', 'cash'
+  const [fileAttached, setFileAttached] = useState(false)
+  const [fileName, setFileName] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [errorMonto, setErrorMonto] = useState('')
 
-  const [paymentOption, setPaymentOption] = useState('deposit'); // 'deposit' (50%) or 'full' (100%)
-  const [paymentMethod, setPaymentMethod] = useState('transfer'); // 'transfer', 'oxxo', 'cash'
-  const [fileAttached, setFileAttached] = useState(false);
-  const [fileName, setFileName] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMonto, setErrorMonto] = useState('');
+  // Early return después de los hooks
+  if (!order) return null
 
-  const total = order.total;
-  const saldoPendiente = order.remainingBalance !== undefined ? order.remainingBalance : Math.max(0, total - (order.depositPaid || 0));
-  const depositAmount = Math.round(total * 0.5);
-  const amountToPay = paymentOption === 'deposit' ? depositAmount : saldoPendiente;
-  const remainingAfterPayment = Math.max(0, saldoPendiente - amountToPay);
+  const total = order.total
+  const saldoPendiente = order.remainingBalance !== undefined ? order.remainingBalance : Math.max(0, total - (order.depositPaid || 0))
+  const depositAmount = Math.round(total * 0.5)
+  const amountToPay = paymentOption === 'deposit' ? depositAmount : saldoPendiente
+  const remainingAfterPayment = Math.max(0, saldoPendiente - amountToPay)
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

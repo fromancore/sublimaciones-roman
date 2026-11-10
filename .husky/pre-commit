@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# ── Pre-commit Hook ──────────────────────────────────────
+# Ejecuta lint-staged sobre los archivos en staging
+# ESLint + Prettier solo en archivos modificados (más rápido)
+npx lint-staged

@@ -1,0 +1,54 @@
+# ============================================================
+# Release Workflow — Sublimaciones Roman
+# Estándar: ISO/IEC/IEEE 12207 — Proceso de Entrega (6.4.7)
+# ============================================================
+# Descripción: Genera releases semánticos automáticos basados
+# en Conventional Commits al hacer merge a main.
+# ============================================================
+
+name: 🏷️ Release — Semantic Versioning
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  release:
+    name: 🏷️ Semantic Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Instalar dependencias
+        run: npm ci --prefer-offline
+
+      - name: 🏗️ Build de producción
+        run: npm run build
+        env:
+          CI: true
+
+      - name: 🏷️ Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

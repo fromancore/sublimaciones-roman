@@ -1,0 +1,45 @@
+root = true
+
+# ── Configuración Global ──────────────────────
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 100
+
+# ── JavaScript / JSX / TypeScript ─────────────
+[*.{js,jsx,ts,tsx}]
+indent_size = 2
+quote_type = single
+
+# ── JSON / YAML ───────────────────────────────
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# ── CSS / SCSS ────────────────────────────────
+[*.{css,scss,sass}]
+indent_size = 2
+
+# ── Markdown ──────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ── Shell Scripts ─────────────────────────────
+[*.sh]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+
+# ── Windows Batch Scripts ─────────────────────
+[*.bat]
+end_of_line = crlf
+
+# ── Make / Dockerfile ─────────────────────────
+[Makefile]
+indent_style = tab
+[Dockerfile*]
+indent_size = 4
