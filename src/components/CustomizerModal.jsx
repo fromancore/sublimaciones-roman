@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon, Type, Shield, FileCheck, ShoppingCart, Columns } from 'lucide-react';
+import { X, Upload, Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon, Type, Shield, FileCheck, ShoppingCart, Columns, Phone } from 'lucide-react';
 import { cotizar } from '../services/cotizacion.js';
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
@@ -14,9 +14,13 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState('');
   
+  // Campo de teléfono obligatorio
+  const [telefono, setTelefono] = useState('');
+
   // Validaciones
   const [errorArchivo, setErrorArchivo] = useState('');
   const [errorCantidad, setErrorCantidad] = useState('');
+  const [errorTelefono, setErrorTelefono] = useState('');
 
   // Specifications
   const [quantity, setQuantity] = useState(1);
@@ -136,11 +140,32 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
   }, [customText, textColor, fontSize, uploadedImage, selectedColor, product]);
 
+  // Validación de teléfono: 10-15 dígitos, permite prefijo + y espacios/guiones
+  const validarTelefono = (valor) => {
+    const soloDigitos = valor.replace(/[\s\-()]+/g, '');
+    const regex = /^\+?\d{10,15}$/;
+    return regex.test(soloDigitos);
+  };
+
   const handleAddToCartSubmit = () => {
+    let hayError = false;
+
     if (quantity < 1) {
       setErrorCantidad('Cantidad mínima 1');
-      return;
+      hayError = true;
     }
+
+    if (!telefono.trim()) {
+      setErrorTelefono('El teléfono es obligatorio');
+      hayError = true;
+    } else if (!validarTelefono(telefono)) {
+      setErrorTelefono('Teléfono inválido (10-15 dígitos)');
+      hayError = true;
+    } else {
+      setErrorTelefono('');
+    }
+
+    if (hayError) return;
     const customizedItem = {
       productId: product.id,
       name: product.name,
@@ -152,6 +177,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       selectedColor,
       selectedSize: product.type === 'playera' ? selectedSize : null,
       customText,
+      telefono: telefono.trim(),
       uploadedFileName: fileName || null,
       uploadedImageUrl: uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null,
       additionalNotes,
@@ -264,6 +290,36 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Campo de Teléfono Obligatorio */}
+            <div className="space-y-2">
+              <label className="text-xs font-headline font-bold text-roman-navy uppercase tracking-wider flex items-center gap-2">
+                <Phone className="w-4 h-4 text-roman-bronze" />
+                Teléfono de Contacto: <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="telefono-contacto"
+                type="tel"
+                required
+                value={telefono}
+                onChange={(e) => {
+                  setTelefono(e.target.value);
+                  if (errorTelefono) setErrorTelefono('');
+                }}
+                placeholder="Ej. +52 614 123 4567"
+                className={`w-full bg-white border rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none shadow-sm transition-colors ${
+                  errorTelefono
+                    ? 'border-red-400 focus:border-red-500 bg-red-50/30'
+                    : 'border-slate-300 focus:border-roman-bronze'
+                }`}
+              />
+              {errorTelefono && (
+                <p className="text-[11px] font-semibold text-red-600 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  {errorTelefono}
+                </p>
+              )}
             </div>
 
             {/* File Upload Section (Firebase Storage Mock) */}
@@ -412,9 +468,9 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
             {/* Submit */}
             <button
               onClick={handleAddToCartSubmit}
-              disabled={quantity < 1 || !!errorArchivo}
+              disabled={quantity < 1 || !!errorArchivo || !telefono.trim()}
               className={`w-full py-4 rounded-xl text-xs font-headline tracking-widest uppercase flex items-center justify-center gap-2 transition-all ${
-                quantity < 1 || !!errorArchivo
+                quantity < 1 || !!errorArchivo || !telefono.trim()
                   ? 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
                   : 'btn-relief-gold'
               }`}
