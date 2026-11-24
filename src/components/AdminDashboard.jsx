@@ -726,7 +726,9 @@ export default function AdminDashboard({
                                   className="block text-[10px] text-slate-500"
                                 >
                                   Tipografía
-                                  {ord.customizations.length > 1 ? ` (${customization.name})` : ''}:{' '}
+                                  {ord.customizations.length > 1
+                                    ? ` (${customization.name})`
+                                    : ''}:{' '}
                                   <span
                                     style={{
                                       fontFamily:

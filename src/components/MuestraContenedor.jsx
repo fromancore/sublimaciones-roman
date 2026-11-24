@@ -31,13 +31,13 @@ export default function MuestraContenedor({
       </div>
 
       {/* Contenedor visual de la muestra oficial */}
-      <div className="group relative flex min-h-[300px] sm:min-h-[340px] flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-900 via-roman-navy to-slate-950 p-6 shadow-inner">
+      <div className="group relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-900 via-roman-navy to-slate-950 p-6 shadow-inner sm:min-h-[340px]">
         {/* Halo / Resplandor de fondo para contraste óptimo con la cerámica blanca */}
         <div className="pointer-events-none absolute h-56 w-56 rounded-full bg-roman-gold/10 blur-2xl" />
 
         {/* Indicadores superiores */}
         <div className="absolute left-3.5 top-3.5 flex items-center gap-1.5 rounded-full border border-roman-gold/30 bg-roman-navy/85 px-2.5 py-1 backdrop-blur-sm">
-          <Sparkles className="h-3 w-3 text-roman-gold animate-pulse" />
+          <Sparkles className="h-3 w-3 animate-pulse text-roman-gold" />
           <span className="font-headline text-[9px] font-bold uppercase tracking-wider text-roman-gold">
             Muestra Oficial
           </span>
@@ -57,7 +57,7 @@ export default function MuestraContenedor({
               }
             }}
             alt={alt}
-            className="h-auto max-h-56 sm:max-h-64 w-auto max-w-[85%] object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.65)] transition-transform duration-500 ease-out group-hover:scale-105"
+            className="h-auto max-h-56 w-auto max-w-[85%] object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.65)] transition-transform duration-500 ease-out group-hover:scale-105 sm:max-h-64"
             loading="eager"
           />
         </div>
