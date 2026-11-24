@@ -12,9 +12,12 @@ import {
   ShoppingCart,
   Columns,
   Phone,
+  Check,
 } from 'lucide-react'
 import { cotizar } from '../services/cotizacion.js'
+import { COLORES_PLAYERA, CUELLOS_PLAYERA, obtenerNombreColorPlayera } from '../services/datos.js'
 import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
+import PlayeraMockup from './PlayeraMockup'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
@@ -40,6 +43,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // Specifications
   const [quantity, setQuantity] = useState(1)
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || '#FFFFFF')
+  const [selectedNeckType, setSelectedNeckType] = useState(CUELLOS_PLAYERA[0])
   const [selectedSize, setSelectedSize] = useState('M')
   const [additionalNotes, setAdditionalNotes] = useState('')
 
@@ -48,7 +52,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // Draw 2D Canvas Mockup Preview
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || product?.type === 'playera') return
     const ctx = canvas.getContext('2d')
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -190,6 +194,9 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       totalPrice,
       quantity,
       selectedColor,
+      selectedColorName:
+        product.type === 'playera' ? obtenerNombreColorPlayera(selectedColor) : null,
+      selectedNeckType: product.type === 'playera' ? selectedNeckType : null,
       selectedSize: product.type === 'playera' ? selectedSize : null,
       customText,
       fontFamily,
@@ -240,34 +247,67 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 Previsualización 2D
               </span>
 
-              <canvas
-                ref={canvasRef}
-                width={260}
-                height={260}
-                className="h-full w-full rounded-xl"
-              />
+              {product.type === 'playera' ? (
+                <PlayeraMockup
+                  color={selectedColor}
+                  cuello={selectedNeckType}
+                  texto={customText}
+                  colorTexto={textColor}
+                  fuente={
+                    FUENTES_DISENO.find(font => font.name === fontFamily)?.fontStack ||
+                    FUENTE_PREDETERMINADA.fontStack
+                  }
+                  imagen={uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null}
+                  className="h-full w-full"
+                />
+              ) : (
+                <canvas
+                  ref={canvasRef}
+                  width={260}
+                  height={260}
+                  className="h-full w-full rounded-xl"
+                />
+              )}
             </div>
 
             {/* Colors Selector */}
             {product.colors && product.colors.length > 0 && (
               <div className="w-full max-w-[320px] space-y-2">
                 <label className="block font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
-                  Color Base del Producto:
+                  {product.type === 'playera' ? 'Color de la camisa:' : 'Color Base del Producto:'}
                 </label>
-                <div className="flex items-center gap-3">
-                  {product.colors.map(colorHex => (
+                <div className="flex flex-wrap items-center gap-3">
+                  {(product.type === 'playera'
+                    ? COLORES_PLAYERA.filter(color => product.colors.includes(color.hex))
+                    : product.colors.map(hex => ({ hex, name: hex }))
+                  ).map(({ hex, name }) => (
                     <button
-                      key={colorHex}
-                      onClick={() => setSelectedColor(colorHex)}
-                      style={{ backgroundColor: colorHex }}
-                      className={`h-8 w-8 rounded-full border-2 transition-transform ${
-                        selectedColor === colorHex
+                      key={hex}
+                      type="button"
+                      aria-label={`Color: ${name}`}
+                      aria-pressed={selectedColor === hex}
+                      onClick={() => setSelectedColor(hex)}
+                      style={{ backgroundColor: hex }}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-transform ${
+                        selectedColor === hex
                           ? 'scale-110 border-roman-gold shadow-md ring-2 ring-roman-bronze'
                           : 'border-slate-300 hover:scale-105'
                       }`}
-                    />
+                    >
+                      {selectedColor === hex && (
+                        <Check
+                          className={`h-4 w-4 ${['#FFFFFF', '#F0F4F8', '#E2E8F0', '#9CA3AF'].includes(hex) ? 'text-roman-navy' : 'text-white'}`}
+                        />
+                      )}
+                    </button>
                   ))}
                 </div>
+                <p className="text-xs font-semibold text-slate-700" aria-live="polite">
+                  Seleccionado:{' '}
+                  {product.type === 'playera'
+                    ? obtenerNombreColorPlayera(selectedColor)
+                    : selectedColor}
+                </p>
               </div>
             )}
 
@@ -284,6 +324,31 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
           {/* Right Column: Customization Controls */}
           <div className="space-y-5 lg:col-span-7">
+            {product.type === 'playera' && (
+              <fieldset className="space-y-2">
+                <legend className="font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                  Tipo de cuello:
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {CUELLOS_PLAYERA.map(neckType => (
+                    <button
+                      key={neckType}
+                      type="button"
+                      aria-pressed={selectedNeckType === neckType}
+                      onClick={() => setSelectedNeckType(neckType)}
+                      className={`rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${
+                        selectedNeckType === neckType
+                          ? 'border-roman-bronze bg-roman-navy text-roman-gold shadow-sm'
+                          : 'border-slate-300 bg-white text-slate-700 hover:border-roman-bronze'
+                      }`}
+                    >
+                      {neckType}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+
             {/* Custom Text Input */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">

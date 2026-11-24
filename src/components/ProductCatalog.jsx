@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Sparkles, Clock, Search, Filter, Tag, CheckCircle2, ChevronRight } from 'lucide-react'
 import tazaMuestraOficial from '../assets/Taza blanca con logo de guerrero romano (1).png'
+import { COLORES_PLAYERA } from '../services/datos.js'
+import PlayeraMockup from './PlayeraMockup'
 
 export const INITIAL_PRODUCTS = [
   {
@@ -42,7 +44,7 @@ export const INITIAL_PRODUCTS = [
       'Transpirable, suave y de secado rápido. Colores vívidos que no se desvanecen con el lavado.',
     badge: 'Popular',
     type: 'playera',
-    colors: ['#FFFFFF', '#F0F4F8', '#E2E8F0'],
+    colors: COLORES_PLAYERA.map(color => color.hex),
     popularImage: '👕',
   },
   {
@@ -221,12 +223,20 @@ export default function ProductCatalog({ onSelectProductToCustomize }) {
                     <span>{product.productionTime}</span>
                   </div>
 
-                  <div className="flex h-32 w-32 items-center justify-center select-none transition-transform duration-300 group-hover:scale-110">
-                    {product.image ? (
+                  <div className="flex h-32 w-32 select-none items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                    {product.type === 'playera' ? (
+                      <PlayeraMockup
+                        color={product.colors[0]}
+                        className="h-full w-full drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+                      />
+                    ) : product.image ? (
                       <img
                         src={product.image}
                         onError={e => {
-                          if (e.currentTarget.src !== '/Taza blanca con logo de guerrero romano (1).png') {
+                          if (
+                            e.currentTarget.src !==
+                            '/Taza blanca con logo de guerrero romano (1).png'
+                          ) {
                             e.currentTarget.src = '/Taza blanca con logo de guerrero romano (1).png'
                           }
                         }}

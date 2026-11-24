@@ -51,7 +51,16 @@ export default function App() {
   // Order Creation from Checkout: Single order with folio ROM-AAAA-NNNN in status 'Recibido'
   const handleCheckout = (items, subtotal) => {
     const newFolio = `ROM-2026-${Math.floor(1000 + Math.random() * 9000)}`
-    const itemsDescription = items.map(i => `${i.name} (x${i.quantity})`).join(', ')
+    const itemsDescription = items
+      .map(i => {
+        const variants = [
+          i.selectedColorName,
+          i.selectedNeckType,
+          i.selectedSize && `Talla ${i.selectedSize}`,
+        ].filter(Boolean)
+        return `${i.name}${variants.length ? ` (${variants.join(', ')})` : ''} (x${i.quantity})`
+      })
+      .join(', ')
     const totalPieces = items.reduce((sum, i) => sum + (i.quantity || 1), 0)
     const mainItem = items[0] || {}
 
@@ -79,6 +88,9 @@ export default function App() {
         fontFamily: item.fontFamily || null,
         textColor: item.textColor,
         selectedColor: item.selectedColor,
+        selectedColorName: item.selectedColorName || null,
+        selectedNeckType: item.selectedNeckType || null,
+        selectedSize: item.selectedSize || null,
       })),
       status: 'Recibido',
       disenoConfirmado: false,

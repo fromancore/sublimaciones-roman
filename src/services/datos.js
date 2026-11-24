@@ -1,6 +1,23 @@
 // src/services/datos.js
 // Capa centralizada de datos (Simulación relacional lista para migrar a API REST / MySQL)
 
+export const COLORES_PLAYERA = [
+  { name: 'Blanco', hex: '#FFFFFF' },
+  { name: 'Negro', hex: '#111827' },
+  { name: 'Azul Marino', hex: '#1B2A4A' },
+  { name: 'Gris Jaspe', hex: '#9CA3AF' },
+  { name: 'Rojo', hex: '#DC2626' },
+  { name: 'Azul Rey', hex: '#2563EB' },
+]
+
+export const CUELLOS_PLAYERA = ['Cuello Redondo', 'Cuello en V', 'Tipo Polo']
+
+const HEX_A_COLOR_PLAYERA = new Map(COLORES_PLAYERA.map(color => [color.hex, color.name]))
+
+export function obtenerNombreColorPlayera(hex) {
+  return HEX_A_COLOR_PLAYERA.get(hex) || hex
+}
+
 export const USUARIOS_INICIALES = [
   {
     id: 'usr-1',
@@ -84,7 +101,7 @@ export const PRODUCTOS_INICIALES = [
       'Transpirable, suave y de secado rápido. Colores vívidos que no se desvanecen con el lavado.',
     badge: 'Popular',
     type: 'playera',
-    colors: ['#FFFFFF', '#F0F4F8', '#E2E8F0'],
+    colors: COLORES_PLAYERA.map(color => color.hex),
     popularImage: '👕',
   },
   {
