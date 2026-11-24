@@ -3,11 +3,11 @@ import { Sparkles, Clock, Search, Filter, Tag, CheckCircle2, ChevronRight } from
 import tazaMagicaNegra from '../assets/Productos_Base/Taza_Magica_Termica_11oz_Negra.png'
 import tazaCeramicaBlanca from '../assets/Productos_Base/Taza_de_Ceramica_Blanca_Clasica_11oz.png'
 import termoInoxidableBlanco from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml_Blanco.png'
-import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.jpg'
-import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.jpg'
-import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.jpg'
-import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.jpg'
-import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.jpg'
+import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.png'
+import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.png'
+import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.png'
+import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.png'
+import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.png'
 import { COLORES_PLAYERA } from '../services/datos.js'
 
 export const INITIAL_PRODUCTS = [
