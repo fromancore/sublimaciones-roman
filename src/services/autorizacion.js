@@ -15,13 +15,11 @@ const ROLES_OPERATIVOS = Object.freeze({
 const normalizarCorreo = correo => correo?.trim().toLowerCase() || ''
 
 export function esAdminAutorizado(usuario) {
-  return usuario?.emailVerified === true && correosAdmin.has(normalizarCorreo(usuario.email))
+  return correosAdmin.has(normalizarCorreo(usuario?.email))
 }
 
 export function obtenerRolUsuario(usuario) {
-  if (!usuario?.emailVerified) return 'cliente'
-
-  const correo = normalizarCorreo(usuario.email)
+  const correo = normalizarCorreo(usuario?.email)
   if (correosAdmin.has(correo)) return 'admin'
   return ROLES_OPERATIVOS[correo] || 'cliente'
 }
@@ -33,11 +31,10 @@ export function puedeAccederPanel(usuario) {
 export function crearPerfilUsuario(usuario) {
   const email = normalizarCorreo(usuario.email)
   return {
-    id: usuario.uid,
-    nombre: usuario.displayName || email.split('@')[0],
+    id: usuario.id || `usr-${Date.now()}`,
+    nombre: usuario.nombre || email.split('@')[0],
     email,
-    telefono: '',
-    emailVerified: usuario.emailVerified === true,
+    telefono: usuario.telefono || '',
     role: obtenerRolUsuario(usuario),
   }
 }

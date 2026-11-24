@@ -148,7 +148,7 @@ export default function Header({
               )}
 
               {/* Selector de Rol: HERRAMIENTA DE DEMOSTRACIÓN (Exclusivo Administrador) */}
-              {currentUser?.role === 'admin' && currentUser?.emailVerified === true && (
+              {currentUser?.role === 'admin' && (
                 <div className="relative">
                   <button
                     onClick={() => setRoleMenuOpen(!roleMenuOpen)}

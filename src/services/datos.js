@@ -21,7 +21,36 @@ export const COLORES_PLAYERA = [
   { name: 'Azul Rey', hex: '#2563EB' },
 ]
 
-export const USUARIOS_INICIALES = []
+export const USUARIOS_INICIALES = [
+  {
+    id: 'usr-2',
+    nombre: 'Diseñador Creativo',
+    email: 'diseno@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'disenador',
+  },
+  {
+    id: 'usr-3',
+    nombre: 'Jefe de Taller Producción',
+    email: 'produccion@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'produccion',
+  },
+  {
+    id: 'usr-4',
+    nombre: 'Encargado de Entregas',
+    email: 'entregas@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'entregas',
+  },
+  {
+    id: 'usr-5',
+    nombre: 'Carlos Mendiburu',
+    email: 'carlos@ejemplo.com',
+    telefono: '9991234567',
+    role: 'cliente',
+  },
+]
 
 export const CUELLOS_PLAYERA = ['Cuello Redondo', 'Cuello en V', 'Tipo Polo']
 

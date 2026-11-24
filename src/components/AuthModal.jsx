@@ -1,14 +1,7 @@
 import { useState } from 'react'
 import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react'
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-} from 'firebase/auth'
 import { crearPerfilUsuario } from '../services/autorizacion.js'
-import { getFirebaseAuth } from '../services/firebase.js'
+import { USUARIOS_INICIALES } from '../services/datos.js'
 
 export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
@@ -18,7 +11,6 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
-  const [datosRegistro, setDatosRegistro] = useState(null)
   const [password, setPassword] = useState('')
 
   // Errores de validación junto al campo
@@ -91,67 +83,28 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
 
     const correo = email.trim().toLowerCase()
 
-    try {
-      const auth = getFirebaseAuth()
+    const usuarioExistente = USUARIOS_INICIALES.find(
+      usuario => usuario.email.toLowerCase() === correo
+    )
+    const usuario = crearPerfilUsuario({
+      ...usuarioExistente,
+      email: correo,
+      nombre: modo === 'registro' ? nombre.trim() : usuarioExistente?.nombre,
+      telefono: modo === 'registro' ? telefono.trim() : usuarioExistente?.telefono,
+    })
 
-      if (modo === 'registro') {
-        const { user } = await createUserWithEmailAndPassword(auth, correo, password)
-
-        try {
-          await updateProfile(user, { displayName: nombre.trim() })
-          await sendEmailVerification(user)
-        } finally {
-          await signOut(auth)
-        }
-
-        setMensajeExito(
-          `Cuenta creada. Confirma tu correo ${correo} desde el mensaje que te enviamos antes de iniciar sesión.`
-        )
-        setDatosRegistro({ correo, telefono: telefono.trim() })
-        return
-      }
-
-      const { user } = await signInWithEmailAndPassword(auth, correo, password)
-
-      if (!user.emailVerified) {
-        try {
-          await sendEmailVerification(user)
-        } finally {
-          await signOut(auth)
-        }
-        setMensajeExito(
-          `Debes confirmar ${correo} antes de iniciar sesión. Te enviamos un nuevo enlace de verificación.`
-        )
-        return
-      }
-
-      setMensajeExito('¡Sesión iniciada con éxito!')
-      setTimeout(() => {
-        const perfil = crearPerfilUsuario(user)
-        if (datosRegistro?.correo === correo) perfil.telefono = datosRegistro.telefono
-        onLoginExitoso(perfil)
+    setMensajeExito(
+      modo === 'registro'
+        ? '¡Cuenta de demostración creada exitosamente!'
+        : '¡Sesión iniciada con éxito!'
+    )
+    setTimeout(
+      () => {
+        onLoginExitoso(usuario)
         onClose()
-      }, 500)
-    } catch (error) {
-      console.error('Error de autenticación con Firebase:', error)
-      const mensajes = {
-        'auth/not-configured':
-          'El inicio de sesión no está configurado. Contacta al administrador del sitio.',
-        'auth/email-already-in-use': 'Este correo ya tiene una cuenta. Inicia sesión.',
-        'auth/invalid-email': 'El correo electrónico no es válido.',
-        'auth/invalid-credential': 'El correo o la contraseña no son correctos.',
-        'auth/user-not-found': 'No existe una cuenta con ese correo.',
-        'auth/wrong-password': 'El correo o la contraseña no son correctos.',
-        'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-        'auth/too-many-requests': 'Demasiados intentos. Espera un momento y vuelve a intentar.',
-        'auth/network-request-failed': 'No se pudo conectar. Revisa tu conexión a internet.',
-        'auth/operation-not-allowed':
-          'El acceso por correo y contraseña no está habilitado en Firebase.',
-      }
-      setErrorGeneral(
-        mensajes[error.code] || 'No se pudo completar la autenticación. Intenta de nuevo.'
-      )
-    }
+      },
+      modo === 'registro' ? 1200 : 1000
+    )
   }
 
   return (
@@ -328,7 +281,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
             </div>
 
             <p className="pt-1 text-[10px] leading-tight text-slate-400">
-              🔒 Tus credenciales son protegidas con cifrado hash y nunca se guardan en texto plano.
+              Inicio de sesión simulado para esta práctica. No se guardan ni verifican credenciales.
             </p>
 
             {/* Botón de envío */}

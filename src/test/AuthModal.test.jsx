@@ -1,32 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const firebaseMocks = vi.hoisted(() => ({
-  auth: {},
-  createUserWithEmailAndPassword: vi.fn(),
-  sendEmailVerification: vi.fn(),
-  signInWithEmailAndPassword: vi.fn(),
-  signOut: vi.fn(),
-  updateProfile: vi.fn(),
-  getFirebaseAuth: vi.fn(),
-}))
-
-vi.mock('firebase/auth', () => ({
-  createUserWithEmailAndPassword: firebaseMocks.createUserWithEmailAndPassword,
-  sendEmailVerification: firebaseMocks.sendEmailVerification,
-  signInWithEmailAndPassword: firebaseMocks.signInWithEmailAndPassword,
-  signOut: firebaseMocks.signOut,
-  updateProfile: firebaseMocks.updateProfile,
-}))
-
-vi.mock('../services/firebase.js', () => ({
-  getFirebaseAuth: firebaseMocks.getFirebaseAuth,
-}))
-
+import { describe, expect, it, vi } from 'vitest'
 import AuthModal from '../components/AuthModal'
 
-const iniciarSesion = async (correo, usuario) => {
-  firebaseMocks.signInWithEmailAndPassword.mockResolvedValue({ user: usuario })
+const iniciarSesion = async correo => {
   const onLoginExitoso = vi.fn()
   render(<AuthModal isOpen onClose={vi.fn()} onLoginExitoso={onLoginExitoso} />)
 
@@ -35,80 +11,49 @@ const iniciarSesion = async (correo, usuario) => {
     target: { value: correo },
   })
   fireEvent.change(screen.getByPlaceholderText('Contraseña'), {
-    target: { value: 'clave-segura-123' },
+    target: { value: 'clave-de-prueba' },
   })
   fireEvent.click(screen.getByRole('button', { name: 'Acceder al Portal' }))
 
-  await waitFor(() => {
-    expect(firebaseMocks.signInWithEmailAndPassword).toHaveBeenCalledWith(
-      firebaseMocks.auth,
-      correo.toLowerCase(),
-      'clave-segura-123'
-    )
+  expect(await screen.findByText('¡Sesión iniciada con éxito!')).toBeInTheDocument()
+
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 1050))
   })
 
-  return onLoginExitoso
+  await waitFor(() => expect(onLoginExitoso).toHaveBeenCalledOnce())
+  return onLoginExitoso.mock.calls[0][0]
 }
 
 describe('AuthModal', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    firebaseMocks.getFirebaseAuth.mockReturnValue(firebaseMocks.auth)
+  it.each([
+    'luisa.roman@admin.sublimacionesroman.com',
+    'david.poot@admin.sublimacionesroman.com',
+    'cristina.canul@admin.sublimacionesroman.com',
+  ])('asigna el rol admin al correo autorizado %s', async correo => {
+    const usuario = await iniciarSesion(correo)
+
+    expect(usuario).toEqual(expect.objectContaining({ email: correo, role: 'admin' }))
   })
 
-  it('asigna el rol administrador a una cuenta autorizada con correo verificado', async () => {
-    const onLoginExitoso = await iniciarSesion('Luisa.Roman@admin.sublimacionesroman.com', {
-      uid: 'admin-1',
-      email: 'Luisa.Roman@admin.sublimacionesroman.com',
-      emailVerified: true,
-      displayName: 'Luisa Román',
-    })
+  it.each(['admin@ejemplo.com', 'admin@sublimacionesroman.com'])(
+    'no asigna rol admin al correo no autorizado %s',
+    async correo => {
+      const usuario = await iniciarSesion(correo)
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 550))
-    })
-
-    expect(onLoginExitoso).toHaveBeenCalledWith(
-      expect.objectContaining({
-        email: 'luisa.roman@admin.sublimacionesroman.com',
-        role: 'admin',
-        emailVerified: true,
-      })
-    )
-  })
-
-  it('no eleva a administrador a un correo ajeno a la lista permitida', async () => {
-    const onLoginExitoso = await iniciarSesion('admin@ejemplo.com', {
-      uid: 'user-1',
-      email: 'admin@ejemplo.com',
-      emailVerified: true,
-      displayName: 'Usuario',
-    })
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 550))
-    })
-
-    expect(onLoginExitoso).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'admin@ejemplo.com', role: 'cliente' })
-    )
-  })
-
-  it('crea cuentas mediante Firebase y solicita verificar el correo', async () => {
-    const usuario = {
-      uid: 'user-2',
-      email: 'cliente@ejemplo.com',
-      emailVerified: false,
+      expect(usuario).toEqual(expect.objectContaining({ email: correo, role: 'cliente' }))
     }
-    firebaseMocks.createUserWithEmailAndPassword.mockResolvedValue({ user: usuario })
+  )
+
+  it('conserva los datos de registro y determina el rol por el correo permitido', async () => {
     const onLoginExitoso = vi.fn()
     render(<AuthModal isOpen onClose={vi.fn()} onLoginExitoso={onLoginExitoso} />)
 
     fireEvent.change(screen.getByPlaceholderText('Ej. Carlos Mendiburu'), {
-      target: { value: 'Cliente Ejemplo' },
+      target: { value: 'Luisa Román' },
     })
     fireEvent.change(screen.getByPlaceholderText('ejemplo@correo.com'), {
-      target: { value: 'cliente@ejemplo.com' },
+      target: { value: 'luisa.roman@admin.sublimacionesroman.com' },
     })
     fireEvent.change(screen.getByPlaceholderText('9371234567'), {
       target: { value: '9991234567' },
@@ -118,37 +63,21 @@ describe('AuthModal', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Crear Mi Cuenta' }))
 
-    await waitFor(() => {
-      expect(firebaseMocks.createUserWithEmailAndPassword).toHaveBeenCalledWith(
-        firebaseMocks.auth,
-        'cliente@ejemplo.com',
-        'clave-segura-123'
-      )
-      expect(firebaseMocks.updateProfile).toHaveBeenCalledWith(usuario, {
-        displayName: 'Cliente Ejemplo',
+    expect(
+      await screen.findByText('¡Cuenta de demostración creada exitosamente!')
+    ).toBeInTheDocument()
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 1250))
+    })
+
+    expect(onLoginExitoso).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nombre: 'Luisa Román',
+        email: 'luisa.roman@admin.sublimacionesroman.com',
+        telefono: '9991234567',
+        role: 'admin',
       })
-      expect(firebaseMocks.sendEmailVerification).toHaveBeenCalledWith(usuario)
-      expect(firebaseMocks.signOut).toHaveBeenCalledWith(firebaseMocks.auth)
-    })
-
-    expect(await screen.findByText(/Confirma tu correo/)).toBeInTheDocument()
-    expect(onLoginExitoso).not.toHaveBeenCalled()
-  })
-
-  it('no inicia sesión con una cuenta cuyo correo todavía no está verificado', async () => {
-    const onLoginExitoso = await iniciarSesion('luisa.roman@admin.sublimacionesroman.com', {
-      uid: 'admin-1',
-      email: 'luisa.roman@admin.sublimacionesroman.com',
-      emailVerified: false,
-      displayName: 'Luisa Román',
-    })
-
-    await waitFor(() => {
-      expect(firebaseMocks.sendEmailVerification).toHaveBeenCalled()
-      expect(firebaseMocks.signOut).toHaveBeenCalledWith(firebaseMocks.auth)
-    })
-
-    expect(onLoginExitoso).not.toHaveBeenCalled()
-    expect(screen.getByText(/Debes confirmar/)).toBeInTheDocument()
+    )
   })
 })

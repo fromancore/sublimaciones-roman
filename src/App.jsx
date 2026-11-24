@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
+import React, { useState } from 'react'
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import ProductCatalog from './components/ProductCatalog'
@@ -19,12 +18,7 @@ import {
   INCIDENCIAS_INICIALES,
 } from './services/datos.js'
 import { registrarPago } from './services/pagos.js'
-import {
-  crearPerfilUsuario,
-  esAdminAutorizado,
-  puedeAccederPanel,
-} from './services/autorizacion.js'
-import { getFirebaseAuth, isFirebaseConfigured } from './services/firebase.js'
+import { esAdminAutorizado, puedeAccederPanel } from './services/autorizacion.js'
 
 export default function App() {
   // Global App States
@@ -32,38 +26,6 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState('cliente')
   const [currentUser, setCurrentUser] = useState(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [authError, setAuthError] = useState('')
-
-  useEffect(() => {
-    if (!isFirebaseConfigured()) return undefined
-
-    const auth = getFirebaseAuth()
-    return onAuthStateChanged(
-      auth,
-      user => {
-        if (user && !user.emailVerified) {
-          setCurrentUser(null)
-          setCurrentRole('cliente')
-          setActiveTab(tab => (tab === 'dashboard' ? 'inicio' : tab))
-          signOut(auth).catch(error => {
-            console.error('No se pudo cerrar la sesión sin verificar:', error)
-            setAuthError('No se pudo cerrar una sesión con correo sin verificar.')
-          })
-          return
-        }
-
-        const perfil = user ? crearPerfilUsuario(user) : null
-        setCurrentUser(perfil)
-        setCurrentRole(perfil?.role || 'cliente')
-        setAuthError('')
-        if (!perfil) setActiveTab(tab => (tab === 'dashboard' ? 'inicio' : tab))
-      },
-      error => {
-        console.error('No se pudo comprobar la sesión de Firebase:', error)
-        setAuthError('No se pudo comprobar tu sesión. Recarga la página e intenta de nuevo.')
-      }
-    )
-  }, [])
 
   const handleSetActiveTab = tab => {
     if (tab === 'dashboard' && !puedeAccederPanel(currentUser)) {
@@ -80,13 +42,10 @@ export default function App() {
     setCurrentRole(role)
   }
 
-  const handleLogout = async () => {
-    try {
-      await signOut(getFirebaseAuth())
-    } catch (error) {
-      console.error('No se pudo cerrar la sesión:', error)
-      window.alert('No se pudo cerrar la sesión. Intenta de nuevo.')
-    }
+  const handleLogout = () => {
+    setCurrentUser(null)
+    setCurrentRole('cliente')
+    if (activeTab === 'dashboard') setActiveTab('inicio')
   }
 
   // Data States (initialized from centralized relational services)
@@ -230,11 +189,6 @@ export default function App() {
 
       {/* Main Content Area based on activeTab */}
       <main className="flex-1">
-        {authError && (
-          <p role="alert" className="bg-rose-100 px-4 py-3 text-center text-sm text-rose-800">
-            {authError}
-          </p>
-        )}
         {activeTab === 'inicio' && <HeroSection />}
 
         {activeTab === 'catalogo' && (
@@ -321,7 +275,6 @@ export default function App() {
           onLoginExitoso={user => {
             setCurrentUser(user)
             setCurrentRole(user?.role || 'cliente')
-            setAuthError('')
           }}
         />
       )}
