@@ -76,6 +76,16 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
                           Cant: {item.quantity} pza{' '}
                           {item.selectedSize ? `• Talla: ${item.selectedSize}` : ''}
                         </p>
+                        {item.selectedColorName && (
+                          <p className="text-[11px] text-slate-600">
+                            Color: {item.selectedColorName}
+                          </p>
+                        )}
+                        {item.selectedNeckType && (
+                          <p className="text-[11px] text-slate-600">
+                            Tipo de cuello: {item.selectedNeckType}
+                          </p>
+                        )}
                       </div>
 
                       <button

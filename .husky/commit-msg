@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # ── Commit-msg Hook ──────────────────────────────────────
 # Valida el mensaje del commit contra Conventional Commits
 # usando commitlint con la configuración .commitlintrc.json
