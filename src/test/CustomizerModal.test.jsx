@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CustomizerModal from '../components/CustomizerModal'
 import { INITIAL_PRODUCTS } from '../components/ProductCatalog'
-import { PRODUCTOS_INICIALES } from '../services/datos.js'
+import { CUELLOS_PLAYERA, PRODUCTOS_INICIALES } from '../services/datos.js'
 
 describe('CustomizerModal text customization', () => {
   let canvasContext
@@ -89,6 +89,36 @@ describe('CustomizerModal text customization', () => {
     )
   })
 
+  it('uses a base image for each shirt color and neckline in both product lists', async () => {
+    const user = userEvent.setup()
+    const catalogShirt = INITIAL_PRODUCTS.find(product => product.type === 'playera')
+    const dataShirt = PRODUCTOS_INICIALES.find(product => product.type === 'playera')
+
+    for (const product of [catalogShirt, dataShirt]) {
+      expect(product.colors).toEqual(product.variantes.map(variant => variant.color))
+      expect(
+        product.variantes.every(variant =>
+          CUELLOS_PLAYERA.every(neckline => Boolean(variant.imagenes[neckline]))
+        )
+      ).toBe(true)
+    }
+
+    render(<CustomizerModal product={catalogShirt} onClose={vi.fn()} onAddToCart={vi.fn()} />)
+    expect(
+      screen.getByLabelText(
+        'Previsualización Playera Dry-Fit Sublimada Total, Blanco, Cuello Redondo'
+      )
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Color: Azul Marino' }))
+    await user.click(screen.getByRole('button', { name: 'Tipo Polo' }))
+    expect(
+      screen.getByLabelText(
+        'Previsualización Playera Dry-Fit Sublimada Total, Azul Marino, Tipo Polo'
+      )
+    ).toBeInTheDocument()
+  })
+
   it('uses only photo-backed cup and thermos variants and displays their color names', async () => {
     const user = userEvent.setup()
     const catalogMagicMug = INITIAL_PRODUCTS.find(product => product.id === 'prod-taza-01')
@@ -110,15 +140,24 @@ describe('CustomizerModal text customization', () => {
       expect(product.variantes.every(variant => variant.image && variant.zona)).toBe(true)
     }
     expect(catalogThermos.colors).not.toContain('#0D1B2A')
+    expect(catalogMagicMug.colors).toEqual(['#0D1B2A', '#000000'])
+    expect(catalogMug.colors).toEqual(['#FFFFFF'])
 
-    const { unmount } = render(
+    const { unmount: unmountClassic } = render(
       <CustomizerModal product={catalogMug} onClose={vi.fn()} onAddToCart={vi.fn()} />
     )
     expect(screen.getByText('Seleccionado: Blanco')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Color: Azul marino' }))
-    expect(screen.getByText('Seleccionado: Azul marino')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Color: Azul marino' })).not.toBeInTheDocument()
 
-    unmount()
+    unmountClassic()
+    const { unmount: unmountMagic } = render(
+      <CustomizerModal product={catalogMagicMug} onClose={vi.fn()} onAddToCart={vi.fn()} />
+    )
+    expect(screen.getByText('Seleccionado: Azul marino')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Color: Negro' }))
+    expect(screen.getByText('Seleccionado: Negro')).toBeInTheDocument()
+
+    unmountMagic()
     render(<CustomizerModal product={catalogThermos} onClose={vi.fn()} onAddToCart={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Texto horizontal' })).toHaveAttribute(
       'aria-pressed',
