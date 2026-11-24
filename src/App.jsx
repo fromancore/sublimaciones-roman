@@ -72,6 +72,14 @@ export default function App() {
           .join(' | ') ||
         mainItem.customText ||
         'Mi Diseño Personalizado',
+      fontFamily: mainItem.fontFamily || null,
+      customizations: items.map(item => ({
+        name: item.name,
+        customText: item.customText,
+        fontFamily: item.fontFamily || null,
+        textColor: item.textColor,
+        selectedColor: item.selectedColor,
+      })),
       status: 'Recibido',
       disenoConfirmado: false,
       disenoVersion: 1,

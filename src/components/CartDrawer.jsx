@@ -1,6 +1,7 @@
 import React from 'react'
 import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Columns } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { FUENTES_DISENO } from '../services/fuentes.js'
 
 export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, onCheckout }) {
   if (!isOpen) return null
@@ -112,6 +113,20 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
                       {item.customText && (
                         <p>
                           <strong className="text-roman-navy">Texto:</strong> "{item.customText}"
+                        </p>
+                      )}
+                      {item.fontFamily && (
+                        <p>
+                          <strong className="text-roman-navy">Tipografía:</strong>{' '}
+                          <span
+                            style={{
+                              fontFamily:
+                                FUENTES_DISENO.find(font => font.name === item.fontFamily)
+                                  ?.fontStack || item.fontFamily,
+                            }}
+                          >
+                            {item.fontFamily}
+                          </span>
                         </p>
                       )}
                       {item.uploadedFileName && (

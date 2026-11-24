@@ -14,12 +14,14 @@ import {
   Phone,
 } from 'lucide-react'
 import { cotizar } from '../services/cotizacion.js'
+import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
 
   // Customizer State
   const [customText, setCustomText] = useState('GUERRERO ROMÁN')
+  const [fontFamily, setFontFamily] = useState(FUENTE_PREDETERMINADA.name)
   const [textColor, setTextColor] = useState('#D4AF37') // Roman Gold
   const [fontSize, setFontSize] = useState(22)
   const [uploadedImage, setUploadedImage] = useState(null)
@@ -79,7 +81,9 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
     function renderText() {
       if (!customText) return
-      ctx.font = `bold ${fontSize}px Cinzel, serif`
+      const selectedFont =
+        FUENTES_DISENO.find(font => font.name === fontFamily) || FUENTE_PREDETERMINADA
+      ctx.font = `bold ${fontSize}px ${selectedFont.fontStack}`
       ctx.fillStyle = textColor
       ctx.textAlign = 'center'
       ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
@@ -87,7 +91,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       ctx.fillText(customText.toUpperCase(), canvas.width / 2, 190)
       ctx.shadowBlur = 0
     }
-  }, [customText, textColor, fontSize, uploadedImage, selectedColor, product])
+  }, [customText, textColor, fontSize, fontFamily, uploadedImage, selectedColor, product])
 
   // Early return después de los hooks
   if (!product) return null
@@ -188,6 +192,8 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       selectedColor,
       selectedSize: product.type === 'playera' ? selectedSize : null,
       customText,
+      fontFamily,
+      textColor,
       telefono: telefono.trim(),
       uploadedFileName: fileName || null,
       uploadedImageUrl: uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null,
@@ -302,6 +308,39 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Typography Selector */}
+            <div className="space-y-2">
+              <label
+                htmlFor="font-family"
+                className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy"
+              >
+                <Type className="h-4 w-4 text-roman-bronze" />
+                Tipografía:
+              </label>
+              <select
+                id="font-family"
+                value={fontFamily}
+                onChange={e => setFontFamily(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-roman-bronze focus:outline-none"
+              >
+                {FUENTES_DISENO.map(font => (
+                  <option key={font.name} value={font.name} style={{ fontFamily: font.fontStack }}>
+                    {font.name} — {font.style}
+                  </option>
+                ))}
+              </select>
+              <p
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-lg text-roman-navy"
+                style={{
+                  fontFamily:
+                    FUENTES_DISENO.find(font => font.name === fontFamily)?.fontStack ||
+                    FUENTE_PREDETERMINADA.fontStack,
+                }}
+              >
+                {customText || 'Vista previa de tu texto'}
+              </p>
             </div>
 
             {/* Campo de Teléfono Obligatorio */}

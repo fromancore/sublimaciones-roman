@@ -11,6 +11,7 @@ import {
   Columns,
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { FUENTES_DISENO } from '../services/fuentes.js'
 
 export const INITIAL_ORDERS = []
 
@@ -382,6 +383,31 @@ export default function OrderTracker({ orders = [], setOrders, onOpenPaymentModa
                       <strong className="text-roman-gold">Texto Sublimado:</strong> "
                       {selectedOrder.customText}"
                     </p>
+                    {selectedOrder.customizations?.map((customization, index) =>
+                      customization.fontFamily ? (
+                        <p
+                          key={`${customization.name}-${index}`}
+                          className="text-xs text-slate-300"
+                        >
+                          <strong className="text-roman-gold">
+                            Tipografía
+                            {selectedOrder.customizations.length > 1
+                              ? ` (${customization.name})`
+                              : ''}
+                            :
+                          </strong>{' '}
+                          <span
+                            style={{
+                              fontFamily:
+                                FUENTES_DISENO.find(font => font.name === customization.fontFamily)
+                                  ?.fontStack || customization.fontFamily,
+                            }}
+                          >
+                            {customization.fontFamily}
+                          </span>
+                        </p>
+                      ) : null
+                    )}
                   </div>
 
                   {selectedOrder.status === 'Diseño Pendiente' ||

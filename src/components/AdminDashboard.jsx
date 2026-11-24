@@ -21,6 +21,7 @@ import {
 import { obtenerReglasDescuento, actualizarReglasDescuento } from '../services/cotizacion.js'
 import { validarPago, calcularResumenPagos } from '../services/pagos.js'
 import { cambiarEstado } from '../services/flujoPedido.js'
+import { FUENTES_DISENO } from '../services/fuentes.js'
 
 export default function AdminDashboard({
   currentRole,
@@ -718,6 +719,27 @@ export default function AdminDashboard({
                             <span className="text-[10px] italic text-roman-bronze">
                               "{ord.customText}"
                             </span>
+                            {ord.customizations?.map((customization, index) =>
+                              customization.fontFamily ? (
+                                <span
+                                  key={`${customization.name}-${index}`}
+                                  className="block text-[10px] text-slate-500"
+                                >
+                                  Tipografía
+                                  {ord.customizations.length > 1 ? ` (${customization.name})` : ''}:{' '}
+                                  <span
+                                    style={{
+                                      fontFamily:
+                                        FUENTES_DISENO.find(
+                                          font => font.name === customization.fontFamily
+                                        )?.fontStack || customization.fontFamily,
+                                    }}
+                                  >
+                                    {customization.fontFamily}
+                                  </span>
+                                </span>
+                              ) : null
+                            )}
                           </td>
 
                           <td className="p-3.5">
