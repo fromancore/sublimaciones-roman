@@ -86,4 +86,89 @@ describe('CustomizerModal text customization', () => {
       })
     )
   })
+
+  it('permite alternar el botón de MAYÚSCULAS y envía el texto transformado al carrito', async () => {
+    const user = userEvent.setup()
+    const onAddToCart = vi.fn()
+    const product = {
+      id: 'prod-taza-01',
+      name: 'Taza Mágica',
+      price: 135,
+      colors: ['#000000'],
+      type: 'taza',
+      material: 'Cerámica',
+      productionTime: '48 hrs',
+    }
+
+    render(<CustomizerModal product={product} onClose={vi.fn()} onAddToCart={onAddToCart} />)
+
+    const inputTexto = screen.getByPlaceholderText(/Ej. GUERRERO ROMÁN/)
+    await user.clear(inputTexto)
+    await user.type(inputTexto, 'sublimado roman')
+
+    // Alternar toggle MAYÚSCULAS
+    const botonMayus = screen.getByRole('button', { name: 'MAYÚSCULAS' })
+    await user.click(botonMayus)
+
+    await user.type(document.getElementById('telefono-contacto'), '9991234567')
+    await user.click(screen.getByRole('button', { name: /AGREGAR AL CARRITO/ }))
+
+    expect(onAddToCart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customText: 'SUBLIMADO ROMAN',
+      })
+    )
+  })
+
+  it('soporta arrastre con Pointer Events sobre el lienzo 2D para actualizar la posición', async () => {
+    const user = userEvent.setup()
+    const onAddToCart = vi.fn()
+    const product = {
+      id: 'prod-taza-02',
+      name: 'Taza Blanca',
+      price: 95,
+      colors: ['#FFFFFF'],
+      type: 'taza',
+      material: 'Cerámica',
+      productionTime: '48 hrs',
+    }
+
+    const { container } = render(
+      <CustomizerModal product={product} onClose={vi.fn()} onAddToCart={onAddToCart} />
+    )
+
+    const canvas = container.querySelector('canvas')
+    expect(canvas).toBeInTheDocument()
+
+    // Simular getBoundingClientRect para cálculo de coordenadas
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 320,
+      height: 320,
+      right: 320,
+      bottom: 320,
+    })
+
+    // Pointer events para arrastrar el texto
+    canvas.dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, clientX: 160, clientY: 160 })
+    )
+    canvas.dispatchEvent(
+      new MouseEvent('pointermove', { bubbles: true, clientX: 200, clientY: 220 })
+    )
+    canvas.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 200, clientY: 220 }))
+
+    await user.type(document.getElementById('telefono-contacto'), '9991234567')
+    await user.click(screen.getByRole('button', { name: /AGREGAR AL CARRITO/ }))
+
+    expect(onAddToCart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        posicion: expect.objectContaining({
+          x: expect.any(Number),
+          y: expect.any(Number),
+        }),
+      })
+    )
+  })
 })

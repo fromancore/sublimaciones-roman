@@ -1,9 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import {
   X,
   Upload,
-  Sparkles,
-  CheckCircle2,
   AlertTriangle,
   Image as ImageIcon,
   Type,
@@ -18,6 +16,7 @@ import { cotizar } from '../services/cotizacion.js'
 import { COLORES_PLAYERA, CUELLOS_PLAYERA, obtenerNombreColorPlayera } from '../services/datos.js'
 import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
 import { COLORES_TEXTO } from '../services/coloresTexto.js'
+import { renderDiseno, zonaARect, puntoAZonaLocal, limitarAZona } from '../services/renderDiseno.js'
 import PlayeraMockup from './PlayeraMockup'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
@@ -32,6 +31,12 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [fileName, setFileName] = useState('')
+
+  // Nuevos estados para posicionamiento relativo, mayúsculas y variantes
+  const [posicion, setPosicion] = useState({ x: 0.5, y: 0.5 })
+  const [mayusculas, setMayusculas] = useState(false)
+  const [zonaPlayera, setZonaPlayera] = useState('pecho')
+  const [isDragging, setIsDragging] = useState(false)
 
   // Campo de teléfono obligatorio
   const [telefono, setTelefono] = useState('')
@@ -50,53 +55,86 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
   const canvasRef = useRef(null)
 
-  // Draw 2D Canvas Mockup Preview
+  // Detección de modo debug (?debug=1)
+  const isDebug =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('debug') === '1'
+
+  // Variantes con foto propia y zonas
+  const selectedVariant = product?.variantes?.find(
+    v => v.color.toLowerCase() === selectedColor.toLowerCase()
+  )
+  const activeImage = selectedVariant?.image || product?.image
+  const activeZona = useMemo(() => {
+    if (product?.type === 'playera') {
+      return (
+        product?.zonaPersonalizable?.[zonaPlayera] ||
+        product?.zonaPersonalizable?.pecho || {
+          x: 0.4,
+          y: 0.22,
+          w: 0.2,
+          h: 0.2,
+          rotacion: 0,
+        }
+      )
+    }
+    return (
+      selectedVariant?.zona ||
+      product?.zonaPersonalizable || {
+        x: 0.25,
+        y: 0.25,
+        w: 0.5,
+        h: 0.5,
+        rotacion: 0,
+      }
+    )
+  }, [product, zonaPlayera, selectedVariant])
+
+  // Cuellos en V y Tipo Polo conservan PlayeraMockup (SVG)
+  const usarMockupSvg = product?.type === 'playera' && selectedNeckType !== 'Cuello Redondo'
+
+  // Draw 2D Canvas Mockup Preview con renderDiseno
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || product?.type === 'playera') return
+    if (!canvas || usarMockupSvg) return
     const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const selectedFont =
+      FUENTES_DISENO.find(font => font.name === fontFamily) || FUENTE_PREDETERMINADA
 
-    ctx.fillStyle = selectedColor
-    ctx.beginPath()
-    ctx.roundRect(20, 20, canvas.width - 40, canvas.height - 40, 20)
-    ctx.fill()
-    ctx.strokeStyle = '#C5A059'
-    ctx.lineWidth = 3
-    ctx.stroke()
-
-    ctx.fillStyle = 'rgba(13, 27, 42, 0.08)'
-    ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80)
-
-    if (uploadedImage && uploadedImage !== 'DOCUMENT_FILE') {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.src = uploadedImage
-      img.onload = () => {
-        ctx.drawImage(img, canvas.width / 2 - 45, 65, 90, 90)
-        renderText()
-      }
-    } else {
-      ctx.font = '40px serif'
-      ctx.textAlign = 'center'
-      ctx.fillText('🏛️', canvas.width / 2, 110)
-      renderText()
-    }
-
-    function renderText() {
-      if (!customText) return
-      const selectedFont =
-        FUENTES_DISENO.find(font => font.name === fontFamily) || FUENTE_PREDETERMINADA
-      ctx.font = `bold ${fontSize}px ${selectedFont.fontStack}`
-      ctx.fillStyle = textColor
-      ctx.textAlign = 'center'
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
-      ctx.shadowBlur = 4
-      ctx.fillText(customText.toUpperCase(), canvas.width / 2, 190)
-      ctx.shadowBlur = 0
-    }
-  }, [customText, textColor, fontSize, fontFamily, uploadedImage, selectedColor, product])
+    renderDiseno(ctx, {
+      productoImg: activeImage,
+      zona: activeZona,
+      texto: customText,
+      fuente: selectedFont.fontStack,
+      color: textColor,
+      tamano: 0.15,
+      posicion,
+      mayusculas,
+      imagenSubida: uploadedImage,
+      efecto: product?.efecto || 'sublimado',
+      tinte:
+        product?.type === 'playera' && selectedNeckType === 'Cuello Redondo' ? selectedColor : null,
+      debug: isDebug,
+    })
+  }, [
+    customText,
+    textColor,
+    fontSize,
+    fontFamily,
+    posicion,
+    mayusculas,
+    uploadedImage,
+    selectedColor,
+    selectedNeckType,
+    zonaPlayera,
+    product,
+    activeImage,
+    activeZona,
+    usarMockupSvg,
+    isDebug,
+  ])
 
   // Early return después de los hooks
   if (!product) return null
@@ -167,6 +205,48 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     return regex.test(soloDigitos)
   }
 
+  // Arrastre con Pointer Events (mouse y touch)
+  const actualizarPosicionPuntero = e => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rectCanvas = canvas.getBoundingClientRect()
+    if (!rectCanvas.width || !rectCanvas.height) return
+
+    const px = ((e.clientX - rectCanvas.left) / rectCanvas.width) * canvas.width
+    const py = ((e.clientY - rectCanvas.top) / rectCanvas.height) * canvas.height
+
+    const rectZone = zonaARect(activeZona, canvas.width, canvas.height)
+    const local = puntoAZonaLocal({ x: px, y: py }, rectZone)
+    const limitada = limitarAZona(local, rectZone)
+    setPosicion({ x: limitada.x, y: limitada.y })
+  }
+
+  const handlePointerDown = e => {
+    if (usarMockupSvg) return
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+    } catch {
+      // Ignorar fallback en entornos sin pointer capture
+    }
+    setIsDragging(true)
+    actualizarPosicionPuntero(e)
+  }
+
+  const handlePointerMove = e => {
+    if (!isDragging || usarMockupSvg) return
+    actualizarPosicionPuntero(e)
+  }
+
+  const handlePointerUp = e => {
+    if (!isDragging) return
+    setIsDragging(false)
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId)
+    } catch {
+      // Ignorar fallback
+    }
+  }
+
   const handleAddToCartSubmit = () => {
     let hayError = false
 
@@ -186,6 +266,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     }
 
     if (hayError) return
+    const textoFinal = mayusculas ? customText.toUpperCase() : customText
     const customizedItem = {
       productId: product.id,
       name: product.name,
@@ -199,9 +280,11 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
         product.type === 'playera' ? obtenerNombreColorPlayera(selectedColor) : null,
       selectedNeckType: product.type === 'playera' ? selectedNeckType : null,
       selectedSize: product.type === 'playera' ? selectedSize : null,
-      customText,
+      customText: textoFinal,
       fontFamily,
       textColor,
+      posicion,
+      zonaElegida: product.type === 'playera' ? zonaPlayera : null,
       telefono: telefono.trim(),
       uploadedFileName: fileName || null,
       uploadedImageUrl: uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null,
@@ -248,11 +331,18 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 Previsualización 2D
               </span>
 
-              {product.type === 'playera' ? (
+              {isDebug && (
+                <span className="absolute right-3 top-3 rounded border border-emerald-500 bg-emerald-950 px-2 py-0.5 font-headline text-[9px] font-bold uppercase text-emerald-400">
+                  DEBUG ON
+                </span>
+              )}
+
+              {usarMockupSvg ? (
+                // TODO: Agregar fotos base calibradas para cuellos 'Cuello en V' y 'Tipo Polo'
                 <PlayeraMockup
                   color={selectedColor}
                   cuello={selectedNeckType}
-                  texto={customText}
+                  texto={mayusculas ? customText.toUpperCase() : customText}
                   colorTexto={textColor}
                   fuente={
                     FUENTES_DISENO.find(font => font.name === fontFamily)?.fontStack ||
@@ -264,12 +354,33 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
               ) : (
                 <canvas
                   ref={canvasRef}
-                  width={260}
-                  height={260}
-                  className="h-full w-full rounded-xl"
+                  width={320}
+                  height={320}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  className={`h-full w-full touch-none select-none rounded-xl ${
+                    isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                  }`}
                 />
               )}
             </div>
+
+            {!usarMockupSvg && (
+              <div className="flex w-full max-w-[320px] items-center justify-between px-1 text-[11px] text-slate-500">
+                <span className="flex items-center gap-1">
+                  <span>✋</span> Arrastra el texto en la zona
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPosicion({ x: 0.5, y: 0.5 })}
+                  className="font-semibold text-roman-bronze hover:underline"
+                >
+                  Centrar texto
+                </button>
+              </div>
+            )}
 
             {/* Colors Selector */}
             {product.colors && product.colors.length > 0 && (
@@ -326,36 +437,84 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
           {/* Right Column: Customization Controls */}
           <div className="space-y-5 lg:col-span-7">
             {product.type === 'playera' && (
-              <fieldset className="space-y-2">
-                <legend className="font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
-                  Tipo de cuello:
-                </legend>
-                <div className="flex flex-wrap gap-2">
-                  {CUELLOS_PLAYERA.map(neckType => (
+              <>
+                <fieldset className="space-y-2">
+                  <legend className="font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                    Tipo de cuello:
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {CUELLOS_PLAYERA.map(neckType => (
+                      <button
+                        key={neckType}
+                        type="button"
+                        aria-pressed={selectedNeckType === neckType}
+                        onClick={() => setSelectedNeckType(neckType)}
+                        className={`rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${
+                          selectedNeckType === neckType
+                            ? 'border-roman-bronze bg-roman-navy text-roman-gold shadow-sm'
+                            : 'border-slate-300 bg-white text-slate-700 hover:border-roman-bronze'
+                        }`}
+                      >
+                        {neckType}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset className="space-y-2">
+                  <legend className="font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                    Área personalizable:
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
                     <button
-                      key={neckType}
                       type="button"
-                      aria-pressed={selectedNeckType === neckType}
-                      onClick={() => setSelectedNeckType(neckType)}
-                      className={`rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${
-                        selectedNeckType === neckType
+                      aria-pressed={zonaPlayera === 'pecho'}
+                      onClick={() => setZonaPlayera('pecho')}
+                      className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
+                        zonaPlayera === 'pecho'
                           ? 'border-roman-bronze bg-roman-navy text-roman-gold shadow-sm'
                           : 'border-slate-300 bg-white text-slate-700 hover:border-roman-bronze'
                       }`}
                     >
-                      {neckType}
+                      Pecho (Centrado)
                     </button>
-                  ))}
-                </div>
-              </fieldset>
+                    <button
+                      type="button"
+                      aria-pressed={zonaPlayera === 'total'}
+                      onClick={() => setZonaPlayera('total')}
+                      className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
+                        zonaPlayera === 'total'
+                          ? 'border-roman-bronze bg-roman-navy text-roman-gold shadow-sm'
+                          : 'border-slate-300 bg-white text-slate-700 hover:border-roman-bronze'
+                      }`}
+                    >
+                      Frente Total
+                    </button>
+                  </div>
+                </fieldset>
+              </>
             )}
 
             {/* Custom Text Input */}
             <div className="space-y-2">
-              <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
-                <Type className="h-4 w-4 text-roman-bronze" />
-                Texto o Nombre Deseado:
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                  <Type className="h-4 w-4 text-roman-bronze" />
+                  Texto o Nombre Deseado:
+                </label>
+                <button
+                  type="button"
+                  aria-pressed={mayusculas}
+                  onClick={() => setMayusculas(prev => !prev)}
+                  className={`rounded-lg border px-2.5 py-1 font-headline text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                    mayusculas
+                      ? 'border-roman-gold bg-roman-navy text-roman-gold shadow-sm'
+                      : 'border-slate-300 bg-white text-slate-600 hover:border-roman-bronze'
+                  }`}
+                >
+                  MAYÚSCULAS
+                </button>
+              </div>
               <input
                 type="text"
                 value={customText}
@@ -423,7 +582,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                     FUENTE_PREDETERMINADA.fontStack,
                 }}
               >
-                {customText || 'Vista previa de tu texto'}
+                {(mayusculas ? customText.toUpperCase() : customText) || 'Vista previa de tu texto'}
               </p>
             </div>
 

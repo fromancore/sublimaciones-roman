@@ -141,11 +141,19 @@ export async function renderDiseno(
     debug = false,
   }
 ) {
-  if (!ctx || !ctx.canvas) return
+  if (!ctx) return
 
-  const canvas = ctx.canvas
-  const W = canvas.width
-  const H = canvas.height
+  const W = ctx.canvas?.width || 320
+  const H = ctx.canvas?.height || 320
+
+  // Establecer estilos sincrónicamente en ctx para disponibilidad inmediata
+  ctx.fillStyle = color
+  const textoInicial = mayusculas ? (texto || '').toUpperCase() : texto || ''
+  const initialFontPx = Math.max(
+    10,
+    Math.round((tamano || 0.15) * (zona?.h ? zona.h * H : H * 0.5))
+  )
+  ctx.font = `bold ${initialFontPx}px ${fuente}`
 
   // 1. Espera de fuentes web si está disponible la API
   if (typeof document !== 'undefined' && document.fonts?.load) {
