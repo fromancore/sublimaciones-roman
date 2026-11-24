@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { zonaARect, puntoAZonaLocal, limitarAZona, renderDiseno } from '../services/renderDiseno.js'
+import {
+  zonaARect,
+  puntoAZonaLocal,
+  limitarAZona,
+  medirTextoZona,
+  renderDiseno,
+} from '../services/renderDiseno.js'
 
 describe('renderDiseno - Funciones Puras', () => {
   describe('zonaARect', () => {
@@ -122,6 +128,115 @@ describe('renderDiseno - Funciones Puras', () => {
 })
 
 describe('renderDiseno - Renderizado Canvas', () => {
+  it('mantiene la proporción real de cada imagen y la densidad de píxeles', async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+    const canvas = {
+      width: 320,
+      height: 150,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ width: 200 }),
+    }
+    const ctx = {
+      canvas,
+      clearRect: vi.fn(),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      restore: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      clip: vi.fn(),
+      fillText: vi.fn(),
+      measureText: vi.fn().mockReturnValue({ width: 20 }),
+    }
+
+    await renderDiseno(ctx, {
+      productoImg: { naturalWidth: 2816, naturalHeight: 1536 },
+      zona: { x: 0, y: 0, w: 1, h: 1 },
+      texto: 'MUESTRA',
+    })
+    expect(canvas.width).toBe(200 * window.devicePixelRatio)
+    expect(canvas.height).toBeCloseTo(canvas.width * (1536 / 2816), 0)
+
+    await renderDiseno(ctx, {
+      productoImg: { naturalWidth: 383, naturalHeight: 800 },
+      zona: { x: 0, y: 0, w: 1, h: 1 },
+      texto: 'MUESTRA',
+    })
+    expect(canvas.height).toBeCloseTo(canvas.width * (800 / 383), 0)
+  })
+
+  it('reduce y divide en dos líneas el texto que no cabe al tamaño mínimo', () => {
+    const ctx = {
+      font: '',
+      measureText: vi.fn(text => {
+        const fontSize = Number(ctx.font.match(/\d+/)?.[0] || 10)
+        return { width: text.length * fontSize * 0.6 }
+      }),
+    }
+    const layout = medirTextoZona(
+      ctx,
+      'Maximiliano Hernández',
+      'sans-serif',
+      { pw: 80, ph: 100, angulo: 0 },
+      0.15
+    )
+
+    expect(layout.fontSize).toBe(10)
+    expect(layout.lineas).toEqual(['Maximiliano', 'Hernández'])
+    expect(layout.ancho).toBeLessThanOrEqual(80 * 0.92)
+  })
+
+  it('usa mezcla normal sobre fotos oscuras y multiply sobre fotos claras', async () => {
+    const sampleContext = {
+      drawImage: vi.fn(),
+      getImageData: vi.fn(() => {
+        const data = new Uint8ClampedArray(16 * 16 * 4)
+        for (let index = 0; index < data.length; index += 4) {
+          data[index] = data[index + 1] = data[index + 2] = 20
+          data[index + 3] = 255
+        }
+        return { data }
+      }),
+    }
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(sampleContext)
+    const ctx = {
+      canvas: { width: 320, height: 180 },
+      clearRect: vi.fn(),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      restore: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      clip: vi.fn(),
+      fillText: vi.fn(),
+      measureText: vi.fn().mockReturnValue({ width: 20 }),
+    }
+    const baseImage = { naturalWidth: 320, naturalHeight: 180 }
+    const options = {
+      productoImg: baseImage,
+      zona: { x: 0.2, y: 0.2, w: 0.6, h: 0.6 },
+      texto: 'ROMÁN',
+    }
+
+    await renderDiseno(ctx, options)
+    expect(ctx.globalCompositeOperation).toBe('source-over')
+
+    sampleContext.getImageData.mockImplementation(() => {
+      const data = new Uint8ClampedArray(16 * 16 * 4)
+      for (let index = 0; index < data.length; index += 4) {
+        data[index] = data[index + 1] = data[index + 2] = 240
+        data[index + 3] = 255
+      }
+      return { data }
+    })
+    await renderDiseno(ctx, options)
+    expect(ctx.globalCompositeOperation).toBe('multiply')
+  })
+
   it('ejecuta el ciclo de renderizado aplicando recorte a la zona, dibujo de texto y modo debug', async () => {
     const canvas = {
       width: 400,

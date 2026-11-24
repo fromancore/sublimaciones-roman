@@ -29,6 +29,45 @@ export function obtenerNombreColorPlayera(hex) {
   return HEX_A_COLOR_PLAYERA.get(hex) || hex
 }
 
+const VARIANTES_TERMO = [
+  {
+    color: '#FFFFFF',
+    nombre: 'Blanco',
+    image: termoInoxidableBlanco,
+    zona: { x: -0.33, y: 0.456, w: 1.5, h: 0.2, rotacion: 90 },
+  },
+  {
+    color: '#C0C0C0',
+    nombre: 'Plateado',
+    image: termoInoxidablePlateado,
+    zona: { x: -0.15, y: 0.463, w: 1.4, h: 0.181, rotacion: 90 },
+  },
+]
+
+const VARIANTES_TAZA_MAGICA = [
+  {
+    color: '#000000',
+    nombre: 'Negro',
+    image: tazaMagicaNegra,
+    zona: { x: 0.342, y: 0.174, w: 0.329, h: 0.664, rotacion: 0 },
+  },
+]
+
+const VARIANTES_TAZA_CLASICA = [
+  {
+    color: '#FFFFFF',
+    nombre: 'Blanco',
+    image: tazaCeramicaBlanca,
+    zona: { x: 0.341, y: 0.176, w: 0.329, h: 0.664, rotacion: 0 },
+  },
+  {
+    color: '#0D1B2A',
+    nombre: 'Azul marino',
+    image: tazaCeramicaAzulMarino,
+    zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
+  },
+]
+
 export const USUARIOS_INICIALES = [
   {
     id: 'usr-1',
@@ -84,10 +123,12 @@ export const PRODUCTOS_INICIALES = [
       'Revela tu diseño personalizado al contacto con bebidas calientes. Impresión HD duradera.',
     badge: 'Más Vendido',
     type: 'taza',
-    colors: ['#0D1B2A', '#000000', '#1B2A4A'],
+    orientacionTexto: 'sigueZona',
+    colors: VARIANTES_TAZA_MAGICA.map(variant => variant.color),
     image: tazaMagicaNegra,
     efecto: 'sublimado',
     zonaPersonalizable: { x: 0.342, y: 0.174, w: 0.329, h: 0.664, rotacion: 0 },
+    variantes: VARIANTES_TAZA_MAGICA,
   },
   {
     id: 'prod-termo-01',
@@ -100,22 +141,12 @@ export const PRODUCTOS_INICIALES = [
       'Conserva bebidas frías 12h y calientes 8h. Acabado brillante con impresión sublimada full color.',
     badge: 'Premium',
     type: 'termo',
-    colors: ['#FFFFFF', '#C0C0C0'],
+    orientacionTexto: 'horizontal',
+    colors: VARIANTES_TERMO.map(variant => variant.color),
     image: termoInoxidableBlanco,
     efecto: 'sublimado',
     zonaPersonalizable: { x: -0.33, y: 0.456, w: 1.5, h: 0.2, rotacion: 90 },
-    variantes: [
-      {
-        color: '#FFFFFF',
-        image: termoInoxidableBlanco,
-        zona: { x: -0.33, y: 0.456, w: 1.5, h: 0.2, rotacion: 90 },
-      },
-      {
-        color: '#C0C0C0',
-        image: termoInoxidablePlateado,
-        zona: { x: -0.15, y: 0.463, w: 1.4, h: 0.181, rotacion: 90 },
-      },
-    ],
+    variantes: VARIANTES_TERMO,
   },
   {
     id: 'prod-playera-01',
@@ -128,6 +159,7 @@ export const PRODUCTOS_INICIALES = [
       'Transpirable, suave y de secado rápido. Colores vívidos que no se desvanecen con el lavado.',
     badge: 'Popular',
     type: 'playera',
+    orientacionTexto: 'sigueZona',
     colors: COLORES_PLAYERA.map(color => color.hex),
     image: playeraDryFit,
     efecto: 'sublimado',
@@ -147,6 +179,7 @@ export const PRODUCTOS_INICIALES = [
       'Ajuste broche plástico retro. Ideal para logotipos, clubes, eventos y regalos de empresa.',
     badge: 'Económico',
     type: 'gorra',
+    orientacionTexto: 'sigueZona',
     colors: ['#0D1B2A', '#2A6F97', '#000000'],
     image: gorraCamionera,
     efecto: 'sublimado',
@@ -163,6 +196,7 @@ export const PRODUCTOS_INICIALES = [
       'Incluye relleno siliconizado ultra suave. Impresión por ambos lados con tus fotos o ilustraciones.',
     badge: 'Regalo Perfecto',
     type: 'cojin',
+    orientacionTexto: 'sigueZona',
     colors: ['#FFFFFF', '#F8F9FA'],
     image: cojinDecorativo,
     efecto: 'sublimado',
@@ -178,6 +212,7 @@ export const PRODUCTOS_INICIALES = [
     description: 'Bordes cosidos reforzados. Deslizamiento suave optimizado para gaming y oficina.',
     badge: 'Gamer XL',
     type: 'mousepad',
+    orientacionTexto: 'sigueZona',
     colors: ['#0D1B2A', '#000000'],
     image: mousepadGamer,
     efecto: 'sublimado',
@@ -194,6 +229,7 @@ export const PRODUCTOS_INICIALES = [
       'Resistente a caídas y rayaduras. Personalizable con fotos distintas en frente y vuelta.',
     badge: 'Detalle',
     type: 'llavero',
+    orientacionTexto: 'sigueZona',
     colors: ['#FFFFFF'],
     image: llaveroPolimero,
     efecto: 'grabado',
@@ -210,22 +246,12 @@ export const PRODUCTOS_INICIALES = [
       'Apta para microondas y lavavajillas. Superficie ultra brillante para colores radiantes.',
     badge: 'Clásico',
     type: 'taza',
-    colors: ['#FFFFFF', '#0D1B2A'],
+    orientacionTexto: 'sigueZona',
+    colors: VARIANTES_TAZA_CLASICA.map(variant => variant.color),
     image: tazaCeramicaBlanca,
     efecto: 'sublimado',
     zonaPersonalizable: { x: 0.341, y: 0.176, w: 0.329, h: 0.664, rotacion: 0 },
-    variantes: [
-      {
-        color: '#FFFFFF',
-        image: tazaCeramicaBlanca,
-        zona: { x: 0.341, y: 0.176, w: 0.329, h: 0.664, rotacion: 0 },
-      },
-      {
-        color: '#0D1B2A',
-        image: tazaCeramicaAzulMarino,
-        zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
-      },
-    ],
+    variantes: VARIANTES_TAZA_CLASICA,
   },
 ]
 

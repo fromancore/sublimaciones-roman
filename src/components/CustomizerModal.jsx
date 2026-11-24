@@ -16,8 +16,34 @@ import { cotizar } from '../services/cotizacion.js'
 import { COLORES_PLAYERA, CUELLOS_PLAYERA, obtenerNombreColorPlayera } from '../services/datos.js'
 import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
 import { COLORES_TEXTO } from '../services/coloresTexto.js'
-import { renderDiseno, zonaARect, puntoAZonaLocal, limitarAZona } from '../services/renderDiseno.js'
+import {
+  renderDiseno,
+  zonaARect,
+  puntoAZonaLocal,
+  limitarAZona,
+  medirTextoZona,
+} from '../services/renderDiseno.js'
 import PlayeraMockup from './PlayeraMockup'
+
+const NOMBRES_COLORES = {
+  '#FFFFFF': 'Blanco',
+  '#0D1B2A': 'Azul marino',
+  '#C0C0C0': 'Plateado',
+  '#000000': 'Negro',
+  '#111827': 'Negro',
+  '#1B2A4A': 'Azul marino',
+  '#2A6F97': 'Azul',
+  '#F8F9FA': 'Blanco',
+  '#F0F4F8': 'Blanco',
+  '#E2E8F0': 'Gris claro',
+  '#9CA3AF': 'Gris jaspe',
+  '#DC2626': 'Rojo',
+  '#2563EB': 'Azul rey',
+}
+
+function nombreColor(hex) {
+  return NOMBRES_COLORES[hex.toUpperCase()] || hex
+}
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
@@ -36,6 +62,9 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   const [posicion, setPosicion] = useState({ x: 0.5, y: 0.5 })
   const [mayusculas, setMayusculas] = useState(false)
   const [zonaPlayera, setZonaPlayera] = useState('pecho')
+  const [orientacionTexto, setOrientacionTexto] = useState(
+    product?.orientacionTexto || (product?.type === 'termo' ? 'horizontal' : 'sigueZona')
+  )
   const [isDragging, setIsDragging] = useState(false)
 
   // Campo de teléfono obligatorio
@@ -99,6 +128,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     if (!canvas || usarMockupSvg) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+    let estaVigente = true
 
     const selectedFont =
       FUENTES_DISENO.find(font => font.name === fontFamily) || FUENTE_PREDETERMINADA
@@ -110,14 +140,17 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       fuente: selectedFont.fontStack,
       color: textColor,
       tamano: 0.15,
+      orientacionTexto,
       posicion,
       mayusculas,
       imagenSubida: uploadedImage,
       efecto: product?.efecto || 'sublimado',
-      tinte:
-        product?.type === 'playera' && selectedNeckType === 'Cuello Redondo' ? selectedColor : null,
       debug: isDebug,
+      estaVigente: () => estaVigente,
     })
+    return () => {
+      estaVigente = false
+    }
   }, [
     customText,
     textColor,
@@ -129,6 +162,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     selectedColor,
     selectedNeckType,
     zonaPlayera,
+    orientacionTexto,
     product,
     activeImage,
     activeZona,
@@ -217,7 +251,22 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
 
     const rectZone = zonaARect(activeZona, canvas.width, canvas.height)
     const local = puntoAZonaLocal({ x: px, y: py }, rectZone)
-    const limitada = limitarAZona(local, rectZone)
+    const texto = mayusculas ? customText.toUpperCase() : customText
+    const selectedFont =
+      FUENTES_DISENO.find(font => font.name === fontFamily) || FUENTE_PREDETERMINADA
+    const layout = medirTextoZona(
+      canvas.getContext('2d'),
+      texto,
+      selectedFont.fontStack,
+      rectZone,
+      0.15,
+      orientacionTexto
+    )
+    const limiteTexto =
+      layout.orientacionHorizontal && rectZone.angulo !== 0
+        ? { width: layout.alto / rectZone.pw, height: layout.ancho / rectZone.ph }
+        : { width: layout.ancho / rectZone.pw, height: layout.alto / rectZone.ph }
+    const limitada = limitarAZona(local, rectZone, limiteTexto)
     setPosicion({ x: limitada.x, y: limitada.y })
   }
 
@@ -277,12 +326,15 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
       quantity,
       selectedColor,
       selectedColorName:
-        product.type === 'playera' ? obtenerNombreColorPlayera(selectedColor) : null,
+        product.type === 'playera'
+          ? obtenerNombreColorPlayera(selectedColor)
+          : selectedVariant?.nombre || nombreColor(selectedColor),
       selectedNeckType: product.type === 'playera' ? selectedNeckType : null,
       selectedSize: product.type === 'playera' ? selectedSize : null,
       customText: textoFinal,
       fontFamily,
       textColor,
+      orientacionTexto,
       posicion,
       zonaElegida: product.type === 'playera' ? zonaPlayera : null,
       telefono: telefono.trim(),
@@ -326,7 +378,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
         <div className="grid grid-cols-1 gap-8 space-y-6 overflow-y-auto bg-roman-stone/50 p-6 lg:grid-cols-12">
           {/* Left Column: Live 2D Canvas Preview */}
           <div className="flex flex-col items-center justify-center space-y-4 lg:col-span-5">
-            <div className="relative flex aspect-square w-full max-w-[320px] flex-col items-center justify-center rounded-2xl border-2 border-roman-bronze/40 bg-white p-4 shadow-card-marble">
+            <div className="relative flex w-full max-w-[320px] flex-col items-center justify-center rounded-2xl border-2 border-roman-bronze/40 bg-white p-4 shadow-card-marble">
               <span className="absolute left-3 top-3 rounded border border-roman-bronze/40 bg-roman-navy px-2 py-0.5 font-headline text-[9px] font-bold uppercase text-roman-gold">
                 Previsualización 2D
               </span>
@@ -349,18 +401,18 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                     FUENTE_PREDETERMINADA.fontStack
                   }
                   imagen={uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null}
-                  className="h-full w-full"
+                  className="w-full"
                 />
               ) : (
                 <canvas
                   ref={canvasRef}
                   width={320}
-                  height={320}
+                  height={150}
                   onPointerDown={handlePointerDown}
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
-                  className={`h-full w-full touch-none select-none rounded-xl ${
+                  className={`h-auto w-full touch-none select-none rounded-xl ${
                     isDragging ? 'cursor-grabbing' : 'cursor-grab'
                   }`}
                 />
@@ -391,7 +443,12 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 <div className="flex flex-wrap items-center gap-3">
                   {(product.type === 'playera'
                     ? COLORES_PLAYERA.filter(color => product.colors.includes(color.hex))
-                    : product.colors.map(hex => ({ hex, name: hex }))
+                    : product.variantes
+                      ? product.variantes.map(variant => ({
+                          hex: variant.color,
+                          name: variant.nombre || nombreColor(variant.color),
+                        }))
+                      : product.colors.map(hex => ({ hex, name: nombreColor(hex) }))
                   ).map(({ hex, name }) => (
                     <button
                       key={hex}
@@ -418,7 +475,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                   Seleccionado:{' '}
                   {product.type === 'playera'
                     ? obtenerNombreColorPlayera(selectedColor)
-                    : selectedColor}
+                    : selectedVariant?.nombre || nombreColor(selectedColor)}
                 </p>
               </div>
             )}
@@ -493,6 +550,34 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                   </div>
                 </fieldset>
               </>
+            )}
+
+            {product.type === 'termo' && (
+              <fieldset className="space-y-2">
+                <legend className="font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                  Orientación del texto:
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'sigueZona', label: 'Texto vertical' },
+                    { value: 'horizontal', label: 'Texto horizontal' },
+                  ].map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={orientacionTexto === option.value}
+                      onClick={() => setOrientacionTexto(option.value)}
+                      className={`rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${
+                        orientacionTexto === option.value
+                          ? 'border-roman-bronze bg-roman-navy text-roman-gold shadow-sm'
+                          : 'border-slate-300 bg-white text-slate-700 hover:border-roman-bronze'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
             )}
 
             {/* Custom Text Input */}

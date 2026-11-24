@@ -86,6 +86,55 @@ export function limitarAZona(pos, rect, tamanoTexto = null) {
   return { x: clampedX, y: clampedY, u: clampedX, v: clampedY }
 }
 
+export function medirTextoZona(ctx, texto, fuente, rect, tamano = 0.15, orientacion = 'sigueZona') {
+  const orientacionHorizontal = orientacion === 'horizontal' && rect.angulo !== 0
+  const anchoDisponible = (orientacionHorizontal ? rect.ph : rect.pw) * 0.92
+  const textoEnLineas = [texto]
+  let fontSize = Math.max(10, Math.round((tamano || 0.15) * rect.ph))
+  const medir = valor =>
+    ctx.measureText ? ctx.measureText(valor).width : fontSize * valor.length * 0.6
+
+  ctx.font = `bold ${fontSize}px ${fuente}`
+  while (fontSize > 10 && medir(texto) > anchoDisponible) {
+    fontSize -= 1
+    ctx.font = `bold ${fontSize}px ${fuente}`
+  }
+
+  if (medir(texto) > anchoDisponible) {
+    const palabras = texto.trim().split(/\s+/)
+    if (palabras.length > 1) {
+      let mejorCorte = 1
+      let mejorDiferencia = Infinity
+      for (let corte = 1; corte < palabras.length; corte += 1) {
+        const diferencia = Math.abs(
+          palabras.slice(0, corte).join(' ').length - palabras.slice(corte).join(' ').length
+        )
+        if (diferencia < mejorDiferencia) {
+          mejorCorte = corte
+          mejorDiferencia = diferencia
+        }
+      }
+      textoEnLineas.splice(
+        0,
+        1,
+        palabras.slice(0, mejorCorte).join(' '),
+        palabras.slice(mejorCorte).join(' ')
+      )
+    }
+  }
+
+  const ancho = Math.max(...textoEnLineas.map(linea => medir(linea)))
+  const alto = fontSize * 1.2 * textoEnLineas.length
+  return {
+    ancho: Math.min(ancho, anchoDisponible),
+    alto,
+    anchoDisponible,
+    fontSize,
+    lineas: textoEnLineas,
+    orientacionHorizontal,
+  }
+}
+
 /**
  * Cache de imágenes cargadas para evitar parpadeos en 60fps.
  */
@@ -137,22 +186,12 @@ export async function renderDiseno(
     mayusculas = false,
     imagenSubida = null,
     efecto = 'sublimado',
-    tinte = null,
+    orientacionTexto = 'sigueZona',
     debug = false,
+    estaVigente = () => true,
   }
 ) {
   if (!ctx) return
-
-  const W = ctx.canvas?.width || 320
-  const H = ctx.canvas?.height || 320
-
-  // Establecer estilos sincrónicamente en ctx para disponibilidad inmediata
-  ctx.fillStyle = color
-  const initialFontPx = Math.max(
-    10,
-    Math.round((tamano || 0.15) * (zona?.h ? zona.h * H : H * 0.5))
-  )
-  ctx.font = `bold ${initialFontPx}px ${fuente}`
 
   // 1. Espera de fuentes web si está disponible la API
   if (typeof document !== 'undefined' && document.fonts?.load) {
@@ -162,9 +201,26 @@ export async function renderDiseno(
       // Ignorar fallback de fuente
     }
   }
+  if (!estaVigente()) return
 
   // 2. Cargar imagen base
   const baseImg = await cargarImagen(productoImg)
+  if (!estaVigente()) return
+  const canvas = ctx.canvas
+  if (baseImg && canvas) {
+    const cssWidth = canvas.getBoundingClientRect?.().width || canvas.clientWidth || 320
+    const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+    const width = Math.round(cssWidth * pixelRatio)
+    const height = Math.round(width * (baseImg.naturalHeight / baseImg.naturalWidth))
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width
+      canvas.height = height
+    }
+  }
+
+  const W = canvas?.width || 320
+  const H = canvas?.height || 320
+  ctx.fillStyle = color
 
   // Limpiar lienzo principal
   ctx.clearRect?.(0, 0, W, H)
@@ -174,23 +230,63 @@ export async function renderDiseno(
     ctx.drawImage?.(baseImg, 0, 0, W, H)
   }
 
-  // 4. Aplicar tinte si corresponde (ej. Playera Cuello Redondo)
-  if (tinte && tinte !== '#FFFFFF' && baseImg) {
-    ctx.save?.()
-    ctx.globalCompositeOperation = 'multiply'
-    ctx.fillStyle = tinte
-    ctx.fillRect?.(0, 0, W, H)
-    ctx.restore?.()
-  }
-
   // 5. Configurar rectángulo de la zona personalizable
   const rect = zonaARect(zona, W, H)
+  let luminanciaPromedio = 1
+  if (baseImg && typeof document !== 'undefined') {
+    const muestra = document.createElement('canvas')
+    muestra.width = 16
+    muestra.height = 16
+    const muestraCtx = muestra.getContext('2d')
+    if (muestraCtx) {
+      const sourceX = Math.max(0, zona?.x ?? 0) * baseImg.naturalWidth
+      const sourceY = Math.max(0, zona?.y ?? 0) * baseImg.naturalHeight
+      const sourceRight = Math.min(1, (zona?.x ?? 0) + (zona?.w ?? 1)) * baseImg.naturalWidth
+      const sourceBottom = Math.min(1, (zona?.y ?? 0) + (zona?.h ?? 1)) * baseImg.naturalHeight
+      const sourceWidth = Math.max(0, sourceRight - sourceX)
+      const sourceHeight = Math.max(0, sourceBottom - sourceY)
+      if (sourceWidth && sourceHeight) {
+        muestraCtx.drawImage(
+          baseImg,
+          sourceX,
+          sourceY,
+          sourceWidth,
+          sourceHeight,
+          0,
+          0,
+          muestra.width,
+          muestra.height
+        )
+        const { data } = muestraCtx.getImageData(0, 0, muestra.width, muestra.height)
+        let totalLuminancia = 0
+        let pixelesVisibles = 0
+        for (let index = 0; index < data.length; index += 4) {
+          const alpha = data[index + 3] / 255
+          if (!alpha) continue
+          const lineariza = canal => {
+            const valor = canal / 255
+            return valor <= 0.04045 ? valor / 12.92 : ((valor + 0.055) / 1.055) ** 2.4
+          }
+          totalLuminancia +=
+            (0.2126 * lineariza(data[index]) +
+              0.7152 * lineariza(data[index + 1]) +
+              0.0722 * lineariza(data[index + 2])) *
+            alpha
+          pixelesVisibles += alpha
+        }
+        luminanciaPromedio = pixelesVisibles ? totalLuminancia / pixelesVisibles : 1
+      }
+    }
+  }
+  // El umbral 0.35 separa zonas oscuras, donde multiply ocultaría el texto, de las claras.
+  const mezclaTexto = luminanciaPromedio < 0.35 ? 'source-over' : 'multiply'
 
   // 6. Cargar imagen subida si existe
   let userImg = null
   if (imagenSubida && imagenSubida !== 'DOCUMENT_FILE') {
     userImg = await cargarImagen(imagenSubida)
   }
+  if (!estaVigente()) return
 
   // 7. Preparar capa para la zona personalizable
   // En navegadores reales se utiliza un canvas temporal para enmascarar con la silueta (destination-in)
@@ -252,22 +348,16 @@ export async function renderDiseno(
   const textoFinal = mayusculas ? (texto || '').toUpperCase() : texto || ''
 
   if (textoFinal) {
-    let fontSizePx = Math.max(10, Math.round((tamano || 0.15) * rect.ph))
-    targetCtx.font = `bold ${fontSizePx}px ${fuente}`
-
-    // Auto-reducción horizontal si excede el ancho de la zona
-    const maxTextoW = rect.pw * 0.9
-    const metrics = targetCtx.measureText
-      ? targetCtx.measureText(textoFinal)
-      : { width: fontSizePx * textoFinal.length * 0.6 }
-    if (metrics.width > maxTextoW && maxTextoW > 0) {
-      const escala = maxTextoW / metrics.width
-      fontSizePx = Math.max(8, Math.floor(fontSizePx * escala))
-      targetCtx.font = `bold ${fontSizePx}px ${fuente}`
-    }
-
+    const layout = medirTextoZona(targetCtx, textoFinal, fuente, rect, tamano, orientacionTexto)
+    targetCtx.font = `bold ${layout.fontSize}px ${fuente}`
     targetCtx.textAlign = 'center'
     targetCtx.textBaseline = 'middle'
+    const textX = rect.cx + posX * Math.cos(rect.angulo) - posY * Math.sin(rect.angulo)
+    const textY = rect.cy + posX * Math.sin(rect.angulo) + posY * Math.cos(rect.angulo)
+    if (layout.orientacionHorizontal) {
+      targetCtx.rotate?.(-rect.angulo)
+      targetCtx.translate?.(-rect.cx, -rect.cy)
+    }
 
     if (efecto === 'grabado') {
       targetCtx.fillStyle = '#1c1917'
@@ -275,11 +365,32 @@ export async function renderDiseno(
       targetCtx.shadowBlur = 2
       targetCtx.shadowOffsetX = 1
       targetCtx.shadowOffsetY = 1
-      targetCtx.fillText?.(textoFinal, posX, posY)
+      layout.lineas.forEach((linea, index) => {
+        const y =
+          (layout.orientacionHorizontal ? textY : posY) +
+          (index - (layout.lineas.length - 1) / 2) * layout.fontSize * 1.2
+        targetCtx.fillText?.(
+          linea,
+          layout.orientacionHorizontal ? textX : posX,
+          y,
+          layout.anchoDisponible
+        )
+      })
     } else {
       // 'sublimado' por defecto
       targetCtx.fillStyle = color
-      targetCtx.fillText?.(textoFinal, posX, posY)
+      targetCtx.globalCompositeOperation = mezclaTexto
+      layout.lineas.forEach((linea, index) => {
+        const y =
+          (layout.orientacionHorizontal ? textY : posY) +
+          (index - (layout.lineas.length - 1) / 2) * layout.fontSize * 1.2
+        targetCtx.fillText?.(
+          linea,
+          layout.orientacionHorizontal ? textX : posX,
+          y,
+          layout.anchoDisponible
+        )
+      })
     }
   }
 
@@ -296,7 +407,7 @@ export async function renderDiseno(
 
     ctx.save?.()
     if (efecto === 'sublimado') {
-      ctx.globalCompositeOperation = 'multiply'
+      ctx.globalCompositeOperation = mezclaTexto
       ctx.globalAlpha = 0.9
     } else {
       ctx.globalCompositeOperation = 'source-over'
