@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { cotizar } from '../services/cotizacion.js'
 import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
+import { COLORES_TEXTO } from '../services/coloresTexto.js'
 
 export default function CustomizerModal({ product, onClose, onAddToCart }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
@@ -297,16 +298,34 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 placeholder="Ej. GUERRERO ROMÁN / Papá #1"
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-800 shadow-sm focus:border-roman-bronze focus:outline-none"
               />
-              <div className="flex items-center gap-3 pt-1">
-                <span className="text-[11px] font-medium text-slate-500">Color de texto:</span>
-                {['#D4AF37', '#0D1B2A', '#C5A059', '#000000', '#E63946'].map(c => (
-                  <button
-                    key={c}
-                    onClick={() => setTextColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={`h-5 w-5 rounded-full border ${textColor === c ? 'ring-2 ring-roman-bronze' : ''}`}
-                  />
-                ))}
+              <div className="space-y-2 pt-1">
+                <label className="flex items-center gap-2 font-headline text-xs font-bold uppercase tracking-wider text-roman-navy">
+                  <Type className="h-4 w-4 text-roman-bronze" />
+                  Color de texto:
+                </label>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {COLORES_TEXTO.map(color => (
+                    <button
+                      key={color.hex}
+                      type="button"
+                      onClick={() => setTextColor(color.hex)}
+                      title={`${color.name} (${color.hex})`}
+                      aria-label={`Color de texto: ${color.name} (${color.hex})`}
+                      aria-pressed={textColor === color.hex}
+                      style={{ backgroundColor: color.hex }}
+                      className={`h-8 w-8 rounded-full border-2 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-roman-bronze focus-visible:ring-offset-2 ${
+                        textColor === color.hex
+                          ? 'scale-110 border-roman-gold shadow-md ring-2 ring-roman-bronze'
+                          : 'border-slate-300 hover:scale-105'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-[11px] font-medium text-slate-500" aria-live="polite">
+                  Seleccionado:{' '}
+                  {COLORES_TEXTO.find(color => color.hex === textColor)?.name || textColor}. Elige
+                  un tono que contraste con el color base.
+                </p>
               </div>
             </div>
 
