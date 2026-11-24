@@ -148,7 +148,6 @@ export async function renderDiseno(
 
   // Establecer estilos sincrónicamente en ctx para disponibilidad inmediata
   ctx.fillStyle = color
-  const textoInicial = mayusculas ? (texto || '').toUpperCase() : texto || ''
   const initialFontPx = Math.max(
     10,
     Math.round((tamano || 0.15) * (zona?.h ? zona.h * H : H * 0.5))
