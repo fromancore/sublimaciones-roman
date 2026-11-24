@@ -1,8 +1,14 @@
 import React, { useState } from 'react'
 import { Sparkles, Clock, Search, Filter, Tag, CheckCircle2, ChevronRight } from 'lucide-react'
-import tazaMuestraOficial from '../assets/Taza blanca con logo de guerrero romano (1).png'
+import tazaMagicaNegra from '../assets/Productos_Base/Taza_Magica_Termica_11oz_Negra.png'
+import tazaCeramicaBlanca from '../assets/Productos_Base/Taza_de_Ceramica_Blanca_Clasica_11oz.png'
+import termoInoxidableBlanco from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml_Blanco.png'
+import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.jpg'
+import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.jpg'
+import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.jpg'
+import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.jpg'
+import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.jpg'
 import { COLORES_PLAYERA } from '../services/datos.js'
-import PlayeraMockup from './PlayeraMockup'
 
 export const INITIAL_PRODUCTS = [
   {
@@ -17,7 +23,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Más Vendido',
     type: 'taza',
     colors: ['#0D1B2A', '#000000', '#1B2A4A'],
-    popularImage: '🍵',
+    image: tazaMagicaNegra,
   },
   {
     id: 'prod-termo-01',
@@ -31,7 +37,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Premium',
     type: 'termo',
     colors: ['#FFFFFF', '#0D1B2A', '#C0C0C0'],
-    popularImage: '🥤',
+    image: termoInoxidableBlanco,
   },
   {
     id: 'prod-playera-01',
@@ -45,7 +51,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Popular',
     type: 'playera',
     colors: COLORES_PLAYERA.map(color => color.hex),
-    popularImage: '👕',
+    image: playeraDryFit,
   },
   {
     id: 'prod-gorra-01',
@@ -59,7 +65,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Económico',
     type: 'gorra',
     colors: ['#0D1B2A', '#2A6F97', '#000000'],
-    popularImage: '🧢',
+    image: gorraCamionera,
   },
   {
     id: 'prod-cojin-01',
@@ -73,7 +79,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Regalo Perfecto',
     type: 'cojin',
     colors: ['#FFFFFF', '#F8F9FA'],
-    popularImage: '🛋️',
+    image: cojinDecorativo,
   },
   {
     id: 'prod-mousepad-01',
@@ -86,7 +92,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Gamer XL',
     type: 'mousepad',
     colors: ['#0D1B2A', '#000000'],
-    popularImage: '🖱️',
+    image: mousepadGamer,
   },
   {
     id: 'prod-llavero-01',
@@ -100,7 +106,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Detalle',
     type: 'llavero',
     colors: ['#FFFFFF'],
-    popularImage: '🔑',
+    image: llaveroPolimero,
   },
   {
     id: 'prod-taza-02',
@@ -114,8 +120,7 @@ export const INITIAL_PRODUCTS = [
     badge: 'Clásico',
     type: 'taza',
     colors: ['#FFFFFF'],
-    popularImage: '☕',
-    image: tazaMuestraOficial,
+    image: tazaCeramicaBlanca,
   },
 ]
 
@@ -224,12 +229,7 @@ export default function ProductCatalog({ onSelectProductToCustomize }) {
                   </div>
 
                   <div className="flex h-32 w-32 select-none items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                    {product.type === 'playera' ? (
-                      <PlayeraMockup
-                        color={product.colors[0]}
-                        className="h-full w-full drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
-                      />
-                    ) : product.image ? (
+                    {product.image ? (
                       <img
                         src={product.image}
                         onError={e => {

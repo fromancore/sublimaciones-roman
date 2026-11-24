@@ -1,6 +1,15 @@
 // src/services/datos.js
 // Capa centralizada de datos (Simulación relacional lista para migrar a API REST / MySQL)
 
+import tazaMagicaNegra from '../assets/Productos_Base/Taza_Magica_Termica_11oz_Negra.png'
+import termoInoxidableBlanco from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml_Blanco.png'
+import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.jpg'
+import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.jpg'
+import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.jpg'
+import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.jpg'
+import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.jpg'
+import tazaCeramicaBlanca from '../assets/Productos_Base/Taza_de_Ceramica_Blanca_Clasica_11oz.png'
+
 export const COLORES_PLAYERA = [
   { name: 'Blanco', hex: '#FFFFFF' },
   { name: 'Negro', hex: '#111827' },
@@ -74,7 +83,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Más Vendido',
     type: 'taza',
     colors: ['#0D1B2A', '#000000', '#1B2A4A'],
-    popularImage: '🍵',
+    image: tazaMagicaNegra,
   },
   {
     id: 'prod-termo-01',
@@ -88,7 +97,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Premium',
     type: 'termo',
     colors: ['#FFFFFF', '#0D1B2A', '#C0C0C0'],
-    popularImage: '🥤',
+    image: termoInoxidableBlanco,
   },
   {
     id: 'prod-playera-01',
@@ -102,7 +111,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Popular',
     type: 'playera',
     colors: COLORES_PLAYERA.map(color => color.hex),
-    popularImage: '👕',
+    image: playeraDryFit,
   },
   {
     id: 'prod-gorra-01',
@@ -116,7 +125,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Económico',
     type: 'gorra',
     colors: ['#0D1B2A', '#2A6F97', '#000000'],
-    popularImage: '🧢',
+    image: gorraCamionera,
   },
   {
     id: 'prod-cojin-01',
@@ -130,7 +139,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Regalo Perfecto',
     type: 'cojin',
     colors: ['#FFFFFF', '#F8F9FA'],
-    popularImage: '🛋️',
+    image: cojinDecorativo,
   },
   {
     id: 'prod-mousepad-01',
@@ -143,7 +152,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Gamer XL',
     type: 'mousepad',
     colors: ['#0D1B2A', '#000000'],
-    popularImage: '🖱️',
+    image: mousepadGamer,
   },
   {
     id: 'prod-llavero-01',
@@ -157,7 +166,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Detalle',
     type: 'llavero',
     colors: ['#FFFFFF'],
-    popularImage: '🔑',
+    image: llaveroPolimero,
   },
   {
     id: 'prod-taza-02',
@@ -171,8 +180,7 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Clásico',
     type: 'taza',
     colors: ['#FFFFFF'],
-    popularImage: '☕',
-    image: '/Taza blanca con logo de guerrero romano (1).png',
+    image: tazaCeramicaBlanca,
   },
 ]
 
