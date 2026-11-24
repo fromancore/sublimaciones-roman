@@ -1,5 +1,8 @@
 import React from 'react'
-import { Shield, Palette, DollarSign, HeartHandshake, Columns } from 'lucide-react'
+import { Shield, Palette, DollarSign, HeartHandshake } from 'lucide-react'
+import MuestraContenedor from './MuestraContenedor'
+
+export { MuestraContenedor }
 
 export default function HeroSection() {
   const valuePillars = [
@@ -69,48 +72,10 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column: Contenedor Oficial de la Muestra */}
           <div className="relative lg:col-span-5">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="card-architectural space-y-6 border-2 border-roman-bronze/30 p-6 shadow-card-marble">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                  <div className="flex items-center gap-2">
-                    <Columns className="h-4 w-4 text-roman-bronze" />
-                    <span className="font-cinzel text-xs font-bold uppercase tracking-wider text-roman-navy">
-                      Muestra de Sublimación
-                    </span>
-                  </div>
-                  <span className="rounded border border-slate-300 bg-roman-stone px-2.5 py-1 font-mono text-[10px] font-bold text-roman-navy">
-                    Cárdenas, TAB
-                  </span>
-                </div>
-
-                <div className="relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-900 to-roman-navy p-6 shadow-inner">
-                  <div className="relative flex h-40 w-40 items-center justify-center">
-                    <div className="flex h-36 w-32 flex-col items-center justify-center rounded-l-md rounded-r-3xl border-4 border-roman-navy bg-gradient-to-tr from-slate-100 via-white to-slate-200 p-3 text-center shadow-2xl">
-                      <div className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-roman-gold/60 bg-roman-navy p-2">
-                        <span className="text-2xl">🏛️</span>
-                        <p className="mt-1 font-cinzel text-[9px] font-bold tracking-widest text-roman-gold">
-                          SUBLIMACIONES ROMÁN
-                        </p>
-                        <p className="text-[7px] uppercase text-slate-300">Tu Arte Aquí</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-xs font-semibold text-slate-200">
-                    Tazas, Termos, Playeras, Gorras y más 🏛️
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-xl border border-roman-bronze/40 bg-roman-stone p-3 text-xs text-slate-700">
-                  <span className="text-lg">🛡️</span>
-                  <p className="text-[11px] leading-tight">
-                    <strong className="font-bold text-roman-navy">Regla RN-01:</strong> Recibes una
-                    prueba visual digital exacta para aprobar antes de imprimir.
-                  </p>
-                </div>
-              </div>
+              <MuestraContenedor />
             </div>
           </div>
         </div>

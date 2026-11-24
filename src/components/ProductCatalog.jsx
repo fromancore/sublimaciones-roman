@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Sparkles, Clock, Search, Filter, Tag, CheckCircle2, ChevronRight } from 'lucide-react'
+import tazaMuestraOficial from '../assets/Taza blanca con logo de guerrero romano (1).png'
 
 export const INITIAL_PRODUCTS = [
   {
@@ -112,6 +113,7 @@ export const INITIAL_PRODUCTS = [
     type: 'taza',
     colors: ['#FFFFFF'],
     popularImage: '☕',
+    image: tazaMuestraOficial,
   },
 ]
 
@@ -219,8 +221,21 @@ export default function ProductCatalog({ onSelectProductToCustomize }) {
                     <span>{product.productionTime}</span>
                   </div>
 
-                  <div className="select-none text-6xl transition-transform duration-300 group-hover:scale-110">
-                    {product.popularImage}
+                  <div className="flex h-32 w-32 items-center justify-center select-none transition-transform duration-300 group-hover:scale-110">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        onError={e => {
+                          if (e.currentTarget.src !== '/Taza blanca con logo de guerrero romano (1).png') {
+                            e.currentTarget.src = '/Taza blanca con logo de guerrero romano (1).png'
+                          }
+                        }}
+                        alt={product.name}
+                        className="h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+                      />
+                    ) : (
+                      <span className="text-6xl">{product.popularImage}</span>
+                    )}
                   </div>
                 </div>
 
