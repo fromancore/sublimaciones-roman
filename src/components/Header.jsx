@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import RomanLogo from './RomanLogo'
+import { puedeAccederPanel } from '../services/autorizacion.js'
 import {
   ShoppingBag,
   Search,
@@ -40,7 +41,9 @@ export default function Header({
       alertBadge: activeOrdersCount > 0,
     },
     { id: 'ubicacion', label: 'Ubicación / Contacto', icon: MapPin },
-    { id: 'dashboard', label: 'Panel Operativo', icon: PackageCheck },
+    ...(puedeAccederPanel(currentUser)
+      ? [{ id: 'dashboard', label: 'Panel Operativo', icon: PackageCheck }]
+      : []),
   ]
 
   const roleLabels = {
@@ -145,7 +148,7 @@ export default function Header({
               )}
 
               {/* Selector de Rol: HERRAMIENTA DE DEMOSTRACIÓN (Exclusivo Administrador) */}
-              {currentUser?.role === 'admin' && (
+              {currentUser?.role === 'admin' && currentUser?.emailVerified === true && (
                 <div className="relative">
                   <button
                     onClick={() => setRoleMenuOpen(!roleMenuOpen)}
@@ -175,7 +178,7 @@ export default function Header({
                           onClick={() => {
                             setCurrentRole(roleKey)
                             setRoleMenuOpen(false)
-                            if (roleKey !== 'cliente') setActiveTab('dashboard')
+                            setActiveTab(roleKey === 'cliente' ? 'inicio' : 'dashboard')
                           }}
                           className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-medium transition-colors ${
                             currentRole === roleKey

@@ -21,6 +21,8 @@ export const COLORES_PLAYERA = [
   { name: 'Azul Rey', hex: '#2563EB' },
 ]
 
+export const USUARIOS_INICIALES = []
+
 export const CUELLOS_PLAYERA = ['Cuello Redondo', 'Cuello en V', 'Tipo Polo']
 
 const HEX_A_COLOR_PLAYERA = new Map(COLORES_PLAYERA.map(color => [color.hex, color.name]))
@@ -65,49 +67,6 @@ const VARIANTES_TAZA_CLASICA = [
     nombre: 'Azul marino',
     image: tazaCeramicaAzulMarino,
     zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
-  },
-]
-
-export const USUARIOS_INICIALES = [
-  {
-    id: 'usr-1',
-    nombre: 'Administrador General',
-    email: 'admin@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'admin',
-    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // 'admin123'
-  },
-  {
-    id: 'usr-2',
-    nombre: 'Diseñador Creativo',
-    email: 'diseno@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'disenador',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-3',
-    nombre: 'Jefe de Taller Producción',
-    email: 'produccion@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'produccion',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-4',
-    nombre: 'Encargado de Entregas',
-    email: 'entregas@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'entregas',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-5',
-    nombre: 'Carlos Mendiburu',
-    email: 'carlos@ejemplo.com',
-    telefono: '9991234567',
-    role: 'cliente',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
   },
 ]
 

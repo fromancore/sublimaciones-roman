@@ -1,24 +1,16 @@
 import { useState } from 'react'
 import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react'
-import { USUARIOS_INICIALES } from '../services/datos.js'
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from 'firebase/auth'
+import { crearPerfilUsuario } from '../services/autorizacion.js'
+import { getFirebaseAuth } from '../services/firebase.js'
 
-/**
- * Función utilitaria para hashear contraseñas con SHA-256 (nunca texto plano)
- */
-async function generarHashContrasena(contrasena) {
-  try {
-    const encoder = new TextEncoder()
-    const data = encoder.encode(contrasena)
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  } catch {
-    // Fallback simple si crypto.subtle no está disponible
-    return btoa(contrasena).split('').reverse().join('')
-  }
-}
-
-export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser }) {
+export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
   const [modo, setModo] = useState('registro') // 'registro' | 'login'
 
@@ -26,6 +18,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
+  const [datosRegistro, setDatosRegistro] = useState(null)
   const [password, setPassword] = useState('')
 
   // Errores de validación junto al campo
@@ -96,48 +89,68 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
 
     if (!validarFormulario()) return
 
-    const hash = await generarHashContrasena(password)
+    const correo = email.trim().toLowerCase()
 
-    if (modo === 'registro') {
-      const nuevoUsuario = {
-        id: `usr-${Date.now()}`,
-        nombre: nombre.trim(),
-        email: email.trim().toLowerCase(),
-        telefono: telefono.trim(),
-        role: 'cliente',
-        passwordHash: hash, // Nunca guardamos texto plano
-        fechaRegistro: new Date().toISOString(),
+    try {
+      const auth = getFirebaseAuth()
+
+      if (modo === 'registro') {
+        const { user } = await createUserWithEmailAndPassword(auth, correo, password)
+
+        try {
+          await updateProfile(user, { displayName: nombre.trim() })
+          await sendEmailVerification(user)
+        } finally {
+          await signOut(auth)
+        }
+
+        setMensajeExito(
+          `Cuenta creada. Confirma tu correo ${correo} desde el mensaje que te enviamos antes de iniciar sesión.`
+        )
+        setDatosRegistro({ correo, telefono: telefono.trim() })
+        return
       }
 
-      setMensajeExito('¡Cuenta creada exitosamente! Bienvenido a Sublimaciones Román.')
-      setTimeout(() => {
-        onLoginExitoso(nuevoUsuario)
-        onClose()
-      }, 1200)
-    } else {
-      // Modo login simulado
-      const usuarioExistente = USUARIOS_INICIALES.find(
-        u => u.email.toLowerCase() === email.trim().toLowerCase()
-      )
+      const { user } = await signInWithEmailAndPassword(auth, correo, password)
 
-      const usuarioLogueado = usuarioExistente
-        ? {
-            ...usuarioExistente,
-            passwordHash: hash,
-          }
-        : {
-            id: `usr-${Date.now()}`,
-            nombre: email.split('@')[0],
-            email: email.trim().toLowerCase(),
-            role: email.includes('admin') ? 'admin' : 'cliente',
-            passwordHash: hash,
-          }
+      if (!user.emailVerified) {
+        try {
+          await sendEmailVerification(user)
+        } finally {
+          await signOut(auth)
+        }
+        setMensajeExito(
+          `Debes confirmar ${correo} antes de iniciar sesión. Te enviamos un nuevo enlace de verificación.`
+        )
+        return
+      }
 
       setMensajeExito('¡Sesión iniciada con éxito!')
       setTimeout(() => {
-        onLoginExitoso(usuarioLogueado)
+        const perfil = crearPerfilUsuario(user)
+        if (datosRegistro?.correo === correo) perfil.telefono = datosRegistro.telefono
+        onLoginExitoso(perfil)
         onClose()
-      }, 1000)
+      }, 500)
+    } catch (error) {
+      console.error('Error de autenticación con Firebase:', error)
+      const mensajes = {
+        'auth/not-configured':
+          'El inicio de sesión no está configurado. Contacta al administrador del sitio.',
+        'auth/email-already-in-use': 'Este correo ya tiene una cuenta. Inicia sesión.',
+        'auth/invalid-email': 'El correo electrónico no es válido.',
+        'auth/invalid-credential': 'El correo o la contraseña no son correctos.',
+        'auth/user-not-found': 'No existe una cuenta con ese correo.',
+        'auth/wrong-password': 'El correo o la contraseña no son correctos.',
+        'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+        'auth/too-many-requests': 'Demasiados intentos. Espera un momento y vuelve a intentar.',
+        'auth/network-request-failed': 'No se pudo conectar. Revisa tu conexión a internet.',
+        'auth/operation-not-allowed':
+          'El acceso por correo y contraseña no está habilitado en Firebase.',
+      }
+      setErrorGeneral(
+        mensajes[error.code] || 'No se pudo completar la autenticación. Intenta de nuevo.'
+      )
     }
   }
 
@@ -168,6 +181,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               setModo('registro')
               setErrores({})
               setErrorGeneral('')
+              setMensajeExito('')
             }}
             className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'registro'
@@ -183,6 +197,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               setModo('login')
               setErrores({})
               setErrorGeneral('')
+              setMensajeExito('')
             }}
             className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'login'
@@ -285,7 +300,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               </label>
               <input
                 type="password"
-                placeholder="Mínimo 8 caracteres"
+                placeholder={modo === 'registro' ? 'Mínimo 8 caracteres' : 'Contraseña'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className={`w-full border bg-roman-stone ${
