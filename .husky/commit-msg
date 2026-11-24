@@ -1,4 +1,8 @@
 # ── Commit-msg Hook ──────────────────────────────────────
 # Valida el mensaje del commit contra Conventional Commits
 # usando commitlint con la configuración .commitlintrc.json
+if [ -d "/c/Program Files/nodejs" ]; then
+  export PATH="/c/Program Files/nodejs:$PATH"
+fi
+
 npx --no -- commitlint --edit "$1"

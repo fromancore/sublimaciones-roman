@@ -1,4 +1,8 @@
 # ── Pre-commit Hook ──────────────────────────────────────
 # Ejecuta lint-staged sobre los archivos en staging
 # ESLint + Prettier solo en archivos modificados (más rápido)
+if [ -d "/c/Program Files/nodejs" ]; then
+  export PATH="/c/Program Files/nodejs:$PATH"
+fi
+
 npx lint-staged
