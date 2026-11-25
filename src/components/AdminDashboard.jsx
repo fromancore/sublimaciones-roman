@@ -22,6 +22,7 @@ import { obtenerReglasDescuento, actualizarReglasDescuento } from '../services/c
 import { validarPago, calcularResumenPagos } from '../services/pagos.js'
 import { cambiarEstado } from '../services/flujoPedido.js'
 import { FUENTES_DISENO } from '../services/fuentes.js'
+import { esAdminAutorizado, puedeAccederPanel } from '../services/autorizacion.js'
 
 export default function AdminDashboard({
   currentRole,
@@ -69,10 +70,20 @@ export default function AdminDashboard({
   const [incidenceDesc, setIncidenceDesc] = useState('')
   const [incidenceSeverity, setIncidenceSeverity] = useState('Media')
 
+  if (!puedeAccederPanel(currentUser)) {
+    return (
+      <section role="alert" className="p-8 text-center font-semibold text-rose-800">
+        No tienes autorización para acceder al panel operativo.
+      </section>
+    )
+  }
+
+  const activeRole = esAdminAutorizado(currentUser) ? currentRole : currentUser.role
+
   // Active user representation
   const activeUser = {
-    role: currentRole,
-    nombre: currentUser?.nombre || `Usuario (${currentRole})`,
+    role: activeRole,
+    nombre: currentUser?.nombre || `Usuario (${activeRole})`,
   }
 
   // Helper to determine if an order has at least 50% validated deposit
@@ -88,7 +99,7 @@ export default function AdminDashboard({
 
   // Filter orders according to active operational role
   const getRoleOrders = () => {
-    if (currentRole === 'produccion') {
+    if (activeRole === 'produccion') {
       // "Vista Producción: muestra solo pedidos con diseño confirmado Y anticipo validado de al menos 50%"
       return orders.filter(
         o =>
@@ -96,10 +107,10 @@ export default function AdminDashboard({
           hasValid50PercentDeposit(o)
       )
     }
-    if (currentRole === 'entregas') {
+    if (activeRole === 'entregas') {
       return orders.filter(o => o.status === 'Listo para Entrega' || o.status === 'Entregado')
     }
-    if (currentRole === 'disenador') {
+    if (activeRole === 'disenador') {
       return orders.filter(
         o =>
           o.status === 'Recibido' ||
@@ -136,6 +147,11 @@ export default function AdminDashboard({
 
   // --- Handlers: Payments ---
   const handleValidatePayment = (pagoId, accion, motivo = '') => {
+    if (!esAdminAutorizado(currentUser)) {
+      alert('Solo los administradores autorizados pueden validar pagos.')
+      return
+    }
+
     const targetPago = (pagos || []).find(p => p.id === pagoId)
     if (!targetPago) return
 
@@ -480,12 +496,12 @@ export default function AdminDashboard({
             </h2>
             <p className="text-xs text-slate-500">
               Vista activa:{' '}
-              <strong className="font-bold uppercase text-roman-bronze">{currentRole}</strong>
+              <strong className="font-bold uppercase text-roman-bronze">{activeRole}</strong>
             </p>
           </div>
 
           {/* Barra de Simulación de Roles (Exclusivo Administrador) */}
-          {currentUser?.role === 'admin' && (
+          {esAdminAutorizado(currentUser) && (
             <div className="flex flex-wrap items-center gap-2">
               {[
                 { id: 'admin', label: '👑 Admin' },
@@ -497,7 +513,7 @@ export default function AdminDashboard({
                   key={r.id}
                   onClick={() => setCurrentRole(r.id)}
                   className={`rounded-xl px-3.5 py-2 font-headline text-xs font-bold uppercase transition-all ${
-                    currentRole === r.id
+                    activeRole === r.id
                       ? 'btn-relief-navy text-white shadow-md'
                       : 'border border-slate-300 bg-roman-stone text-slate-600 hover:text-slate-900'
                   }`}
@@ -510,7 +526,7 @@ export default function AdminDashboard({
         </div>
 
         {/* ADMIN METRICS SUMMARY (Solo en Vista Admin) */}
-        {currentRole === 'admin' && (
+        {activeRole === 'admin' && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="card-architectural border-2 border-roman-bronze bg-gradient-to-br from-roman-navy to-slate-900 p-5 text-white">
@@ -580,7 +596,7 @@ export default function AdminDashboard({
         )}
 
         {/* Role Notices */}
-        {currentRole === 'produccion' && (
+        {activeRole === 'produccion' && (
           <div className="flex items-center gap-3 rounded-xl border border-roman-bronze bg-roman-stone p-4 text-xs font-medium text-roman-navy">
             <Sparkles className="h-5 w-5 shrink-0 text-roman-bronze" />
             <p>
@@ -592,7 +608,7 @@ export default function AdminDashboard({
           </div>
         )}
 
-        {currentRole === 'entregas' && (
+        {activeRole === 'entregas' && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-roman-stone p-4 text-xs font-medium text-slate-700">
             <Package className="h-5 w-5 shrink-0 text-roman-navy" />
             <p>
@@ -604,7 +620,7 @@ export default function AdminDashboard({
         )}
 
         {/* ADMIN NAVIGATION TABS */}
-        {currentRole === 'admin' && (
+        {activeRole === 'admin' && (
           <div className="flex flex-wrap items-center gap-2 border-b border-slate-300 pb-3">
             <button
               onClick={() => setActiveTab('orders')}
@@ -655,12 +671,12 @@ export default function AdminDashboard({
         )}
 
         {/* 1. ORDERS QUEUE (Active across all roles, filtered per role) */}
-        {(activeTab === 'orders' || currentRole !== 'admin') && (
+        {(activeTab === 'orders' || activeRole !== 'admin') && (
           <div className="card-architectural space-y-6 p-6 shadow-card-marble">
             <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-cinzel text-lg font-bold text-roman-navy">
                 <Package className="h-5 w-5 text-roman-bronze" />
-                Cola de Pedidos - {currentRole.toUpperCase()} ({roleFilteredOrders.length})
+                Cola de Pedidos - {activeRole.toUpperCase()} ({roleFilteredOrders.length})
               </h3>
             </div>
 
@@ -778,7 +794,7 @@ export default function AdminDashboard({
 
                           <td className="space-x-2 p-3.5 text-right">
                             {/* DISEÑADOR ACTIONS */}
-                            {currentRole === 'disenador' && (
+                            {activeRole === 'disenador' && (
                               <button
                                 onClick={() => handleOpenProposalModal(ord)}
                                 className="btn-relief-gold rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase"
@@ -788,7 +804,7 @@ export default function AdminDashboard({
                             )}
 
                             {/* PRODUCCION ACTIONS */}
-                            {currentRole === 'produccion' && (
+                            {activeRole === 'produccion' && (
                               <div className="inline-flex items-center gap-1.5">
                                 {ord.status === 'Diseño Confirmado' && (
                                   <button
@@ -817,7 +833,7 @@ export default function AdminDashboard({
                             )}
 
                             {/* ENTREGAS ACTIONS */}
-                            {currentRole === 'entregas' && (
+                            {activeRole === 'entregas' && (
                               <>
                                 {ord.status === 'Listo para Entrega' ? (
                                   <button
@@ -835,7 +851,7 @@ export default function AdminDashboard({
                             )}
 
                             {/* ADMIN ACTIONS: Cancel order button with confirmation */}
-                            {currentRole === 'admin' && canCancel && (
+                            {activeRole === 'admin' && canCancel && (
                               <button
                                 onClick={() => setOrderToCancel(ord)}
                                 className="rounded-lg border border-red-300 bg-red-50 px-2.5 py-1.5 text-[10px] font-bold uppercase text-red-700 hover:bg-red-100"
@@ -856,7 +872,7 @@ export default function AdminDashboard({
         )}
 
         {/* 2. ADMIN TAB: VALIDACIÓN DE PAGOS */}
-        {activeTab === 'pagos' && currentRole === 'admin' && (
+        {activeTab === 'pagos' && activeRole === 'admin' && (
           <div className="card-architectural space-y-6 p-6 shadow-card-marble">
             <div className="flex items-center justify-between">
               <div>
@@ -988,7 +1004,7 @@ export default function AdminDashboard({
         )}
 
         {/* 3. ADMIN TAB: REGLAS DE DESCUENTO EDITABLES */}
-        {activeTab === 'descuentos' && currentRole === 'admin' && (
+        {activeTab === 'descuentos' && activeRole === 'admin' && (
           <div className="card-architectural space-y-6 p-6 shadow-card-marble">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
@@ -1097,7 +1113,7 @@ export default function AdminDashboard({
         )}
 
         {/* 4. ADMIN TAB: CATALOG */}
-        {activeTab === 'catalog' && currentRole === 'admin' && (
+        {activeTab === 'catalog' && activeRole === 'admin' && (
           <div className="card-architectural space-y-6 p-6 shadow-card-marble">
             <div className="flex items-center justify-between">
               <h3 className="font-cinzel text-lg font-bold text-roman-navy">

@@ -13,9 +13,10 @@ import {
   Check,
 } from 'lucide-react'
 import { cotizar } from '../services/cotizacion.js'
-import { COLORES_PLAYERA, CUELLOS_PLAYERA, obtenerNombreColorPlayera } from '../services/datos.js'
+import { CUELLOS_PLAYERA, obtenerNombreColorPlayera } from '../services/datos.js'
 import { FUENTES_DISENO, FUENTE_PREDETERMINADA } from '../services/fuentes.js'
 import { COLORES_TEXTO } from '../services/coloresTexto.js'
+import { VARIANTES_PLAYERA } from '../services/variantesPlayera.js'
 import {
   renderDiseno,
   zonaARect,
@@ -23,7 +24,6 @@ import {
   limitarAZona,
   medirTextoZona,
 } from '../services/renderDiseno.js'
-import PlayeraMockup from './PlayeraMockup'
 
 const NOMBRES_COLORES = {
   '#FFFFFF': 'Blanco',
@@ -93,7 +93,18 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   const selectedVariant = product?.variantes?.find(
     v => v.color.toLowerCase() === selectedColor.toLowerCase()
   )
-  const activeImage = selectedVariant?.image || product?.image
+  const selectedPlayeraVariant =
+    product?.type === 'playera'
+      ? (product.variantes || VARIANTES_PLAYERA).find(
+          variant => variant.color.toLowerCase() === selectedColor.toLowerCase()
+        )
+      : null
+  const activeImage =
+    product?.type === 'playera'
+      ? selectedPlayeraVariant?.imagenes?.[selectedNeckType] ||
+        selectedPlayeraVariant?.image ||
+        product?.image
+      : selectedVariant?.image || product?.image
   const activeZona = useMemo(() => {
     if (product?.type === 'playera') {
       return (
@@ -119,13 +130,10 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     )
   }, [product, zonaPlayera, selectedVariant])
 
-  // Cuellos en V y Tipo Polo conservan PlayeraMockup (SVG)
-  const usarMockupSvg = product?.type === 'playera' && selectedNeckType !== 'Cuello Redondo'
-
   // Draw 2D Canvas Mockup Preview con renderDiseno
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || usarMockupSvg) return
+    if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     let estaVigente = true
@@ -166,7 +174,6 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
     product,
     activeImage,
     activeZona,
-    usarMockupSvg,
     isDebug,
   ])
 
@@ -271,7 +278,6 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   }
 
   const handlePointerDown = e => {
-    if (usarMockupSvg) return
     try {
       e.currentTarget.setPointerCapture?.(e.pointerId)
     } catch {
@@ -282,7 +288,7 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
   }
 
   const handlePointerMove = e => {
-    if (!isDragging || usarMockupSvg) return
+    if (!isDragging) return
     actualizarPosicionPuntero(e)
   }
 
@@ -389,50 +395,33 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 </span>
               )}
 
-              {usarMockupSvg ? (
-                // TODO: Agregar fotos base calibradas para cuellos 'Cuello en V' y 'Tipo Polo'
-                <PlayeraMockup
-                  color={selectedColor}
-                  cuello={selectedNeckType}
-                  texto={mayusculas ? customText.toUpperCase() : customText}
-                  colorTexto={textColor}
-                  fuente={
-                    FUENTES_DISENO.find(font => font.name === fontFamily)?.fontStack ||
-                    FUENTE_PREDETERMINADA.fontStack
-                  }
-                  imagen={uploadedImage !== 'DOCUMENT_FILE' ? uploadedImage : null}
-                  className="w-full"
-                />
-              ) : (
-                <canvas
-                  ref={canvasRef}
-                  width={320}
-                  height={150}
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerCancel={handlePointerUp}
-                  className={`h-auto w-full touch-none select-none rounded-xl ${
-                    isDragging ? 'cursor-grabbing' : 'cursor-grab'
-                  }`}
-                />
-              )}
+              <canvas
+                ref={canvasRef}
+                aria-label={`Previsualización ${product.name}, ${obtenerNombreColorPlayera(selectedColor)}, ${selectedNeckType}`}
+                width={320}
+                height={150}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                className={`h-auto w-full touch-none select-none rounded-xl ${
+                  isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                }`}
+              />
             </div>
 
-            {!usarMockupSvg && (
-              <div className="flex w-full max-w-[320px] items-center justify-between px-1 text-[11px] text-slate-500">
-                <span className="flex items-center gap-1">
-                  <span>✋</span> Arrastra el texto en la zona
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPosicion({ x: 0.5, y: 0.5 })}
-                  className="font-semibold text-roman-bronze hover:underline"
-                >
-                  Centrar texto
-                </button>
-              </div>
-            )}
+            <div className="flex w-full max-w-[320px] items-center justify-between px-1 text-[11px] text-slate-500">
+              <span className="flex items-center gap-1">
+                <span>✋</span> Arrastra el texto en la zona
+              </span>
+              <button
+                type="button"
+                onClick={() => setPosicion({ x: 0.5, y: 0.5 })}
+                className="font-semibold text-roman-bronze hover:underline"
+              >
+                Centrar texto
+              </button>
+            </div>
 
             {/* Colors Selector */}
             {product.colors && product.colors.length > 0 && (
@@ -442,7 +431,9 @@ export default function CustomizerModal({ product, onClose, onAddToCart }) {
                 </label>
                 <div className="flex flex-wrap items-center gap-3">
                   {(product.type === 'playera'
-                    ? COLORES_PLAYERA.filter(color => product.colors.includes(color.hex))
+                    ? (product.variantes || VARIANTES_PLAYERA)
+                        .filter(variant => product.colors.includes(variant.color))
+                        .map(variant => ({ hex: variant.color, name: variant.nombre }))
                     : product.variantes
                       ? product.variantes.map(variant => ({
                           hex: variant.color,

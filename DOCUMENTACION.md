@@ -40,15 +40,15 @@ Plataforma e-commerce, estudio interactivo de personalización 2D y sistema inte
 
 ## 3. Arquitectura Tecnológica
 
-| Componente                   | Tecnología                           | Descripción                                                     |
-| :--------------------------- | :----------------------------------- | :-------------------------------------------------------------- |
-| **Framework Frontend**       | React 18 + Vite 5                    | Single Page Application (SPA) modular, rápida y reactiva        |
-| **Estilos y Diseño**         | Tailwind CSS v3                      | Sistema atómico de diseño con tokens corporativos greco-romanos |
-| **Capa de Servicios**        | JavaScript ES6 Modular               | Lógica de negocio desacoplada en `src/services/`                |
-| **Seguridad / Criptografía** | Web Crypto API (SHA-256)             | Cifrado criptográfico de contraseñas de usuarios                |
-| **Iconografía**              | Lucide React                         | Iconografía vectorial SVG estilizada                            |
-| **Efectos Interactivos**     | Canvas 2D + Canvas Confetti          | Previsualización en vivo en lienzo HTML5 y celebración visual   |
-| **Geolocalización**          | Google Maps Platform / Leaflet Ready | Mapa interactivo centrado en Cárdenas, Tabasco                  |
+| Componente               | Tecnología                           | Descripción                                                     |
+| :----------------------- | :----------------------------------- | :-------------------------------------------------------------- |
+| **Framework Frontend**   | React 18 + Vite 5                    | Single Page Application (SPA) modular, rápida y reactiva        |
+| **Estilos y Diseño**     | Tailwind CSS v3                      | Sistema atómico de diseño con tokens corporativos greco-romanos |
+| **Capa de Servicios**    | JavaScript ES6 Modular               | Lógica de negocio desacoplada en `src/services/`                |
+| **Autenticación**        | Simulación local en React            | Inicio de sesión de demostración con roles predefinidos         |
+| **Iconografía**          | Lucide React                         | Iconografía vectorial SVG estilizada                            |
+| **Efectos Interactivos** | Canvas 2D + Canvas Confetti          | Previsualización en vivo en lienzo HTML5 y celebración visual   |
+| **Geolocalización**      | Google Maps Platform / Leaflet Ready | Mapa interactivo centrado en Cárdenas, Tabasco                  |
 
 ---
 
@@ -94,7 +94,7 @@ Toda la lógica de cálculo y reglas operativas está desacoplada de los compone
 
 Estructura de datos relacional normalizada en 8 tablas lista para migrar a backend REST / MySQL:
 
-1. `usuarios`: Cuentas de usuarios con roles y `passwordHash` (SHA-256).
+1. `usuarios`: Usuarios de demostración y roles iniciales almacenados en memoria local.
 2. `productos`: Catálogo base de 8 productos con especificaciones y precios.
 3. `pedidos`: Órdenes con folios formato `ROM-AAAA-NNNN`.
 4. `detalles_pedido`: Desglose multilínea de productos, tallas, colores y notas.
@@ -110,11 +110,17 @@ Estructura de datos relacional normalizada en 8 tablas lista para migrar a backe
 ### 5.1. Header y Autenticación (`Header.jsx` & `AuthModal.jsx`)
 
 - **Acceso:** Botón _"Ingresar / Registrarse"_ en la barra de navegación.
-- **Registro Seguro:** Valida nombre obligatorio, correo electrónico válido, teléfono a 10 dígitos exactos, y contraseña
-  mínima de 8 caracteres con barra medidora de seguridad (Débil, Media, Fuerte).
-- **Criptografía:** Hasheo inmediato con **SHA-256** antes de almacenar (nunca viaja ni se guarda en texto plano).
+- **Autenticación de demostración:** El inicio de sesión ocurre localmente, sin Firebase, servidor ni base de datos. Se
+  valida el formato del correo y se pide una contraseña; las credenciales no se autentican ni se guardan.
+- **Registro:** Valida nombre obligatorio, correo válido, teléfono de 10 dígitos y contraseña de al menos 8 caracteres.
+- **Roles de administrador:** Al iniciar sesión, los correos `luisa.roman@admin.sublimacionesroman.com`,
+  `david.poot@admin.sublimacionesroman.com` y `cristina.canul@admin.sublimacionesroman.com` reciben el rol `admin`.
+  Ningún otro correo recibe ese rol por contener la palabra "admin".
 - **Herramienta de Demostración:** Selector claramente etiquetado como _"🛠️ Herramienta de Demostración (Simular Rol)"_
-  para alternar entre Cliente, Administrador, Diseñador, Producción y Entregas.
+  disponible únicamente para los tres correos permitidos.
+- **Alcance actual:** Esta asignación es para la práctica local, no una medida de seguridad real: cualquiera puede
+  simular el inicio de sesión con uno de los correos permitidos. Los pedidos, pagos y productos siguen en memoria del
+  navegador; producción requiere autenticación y autorización del lado servidor.
 
 ### 5.2. Página de Inicio (`HeroSection.jsx`)
 

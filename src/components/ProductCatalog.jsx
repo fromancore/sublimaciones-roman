@@ -5,12 +5,11 @@ import tazaCeramicaBlanca from '../assets/Productos_Base/Taza_de_Ceramica_Blanca
 import termoInoxidableBlanco from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml_Blanco.png'
 import termoInoxidablePlateado from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml.png'
 import tazaCeramicaAzulMarino from '../assets/Productos_Base/Taza_Ceramica_Azul_Marino_11oz.png'
-import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.png'
 import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.png'
 import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.png'
 import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.png'
 import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.png'
-import { COLORES_PLAYERA } from '../services/datos.js'
+import { VARIANTES_PLAYERA } from '../services/variantesPlayera.js'
 
 const VARIANTES_TERMO = [
   {
@@ -29,6 +28,12 @@ const VARIANTES_TERMO = [
 
 const VARIANTES_TAZA_MAGICA = [
   {
+    color: '#0D1B2A',
+    nombre: 'Azul marino',
+    image: tazaCeramicaAzulMarino,
+    zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
+  },
+  {
     color: '#000000',
     nombre: 'Negro',
     image: tazaMagicaNegra,
@@ -42,12 +47,6 @@ const VARIANTES_TAZA_CLASICA = [
     nombre: 'Blanco',
     image: tazaCeramicaBlanca,
     zona: { x: 0.341, y: 0.176, w: 0.329, h: 0.664, rotacion: 0 },
-  },
-  {
-    color: '#0D1B2A',
-    nombre: 'Azul marino',
-    image: tazaCeramicaAzulMarino,
-    zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
   },
 ]
 
@@ -65,7 +64,7 @@ export const INITIAL_PRODUCTS = [
     type: 'taza',
     orientacionTexto: 'sigueZona',
     colors: VARIANTES_TAZA_MAGICA.map(variant => variant.color),
-    image: tazaMagicaNegra,
+    image: tazaCeramicaAzulMarino,
     zonaPersonalizable: { x: 0.342, y: 0.174, w: 0.329, h: 0.664, rotacion: 0 },
     variantes: VARIANTES_TAZA_MAGICA,
   },
@@ -98,8 +97,9 @@ export const INITIAL_PRODUCTS = [
     badge: 'Popular',
     type: 'playera',
     orientacionTexto: 'sigueZona',
-    colors: COLORES_PLAYERA.map(color => color.hex),
-    image: playeraDryFit,
+    colors: VARIANTES_PLAYERA.map(variant => variant.color),
+    image: VARIANTES_PLAYERA[0].image,
+    variantes: VARIANTES_PLAYERA,
   },
   {
     id: 'prod-gorra-01',

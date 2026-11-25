@@ -4,13 +4,13 @@
 import tazaMagicaNegra from '../assets/Productos_Base/Taza_Magica_Termica_11oz_Negra.png'
 import termoInoxidableBlanco from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml_Blanco.png'
 import termoInoxidablePlateado from '../assets/Productos_Base/Termo_de_Acero_Inoxidable_500ml.png'
-import playeraDryFit from '../assets/Productos_Base/Playera_Dry-Fit_Sublimada_Total.png'
 import gorraCamionera from '../assets/Productos_Base/Gorra_Camionera_Frente_Blanco.png'
 import cojinDecorativo from '../assets/Productos_Base/Cojin_Decorativo_40x40cm.png'
 import mousepadGamer from '../assets/Productos_Base/Mousepad_Gamer_Antideslizante_30x80cm.png'
 import llaveroPolimero from '../assets/Productos_Base/Llavero_de_Polimero_Doble_Cara.png'
 import tazaCeramicaBlanca from '../assets/Productos_Base/Taza_de_Ceramica_Blanca_Clasica_11oz.png'
 import tazaCeramicaAzulMarino from '../assets/Productos_Base/Taza_Ceramica_Azul_Marino_11oz.png'
+import { VARIANTES_PLAYERA } from './variantesPlayera.js'
 
 export const COLORES_PLAYERA = [
   { name: 'Blanco', hex: '#FFFFFF' },
@@ -19,6 +19,37 @@ export const COLORES_PLAYERA = [
   { name: 'Gris Jaspe', hex: '#9CA3AF' },
   { name: 'Rojo', hex: '#DC2626' },
   { name: 'Azul Rey', hex: '#2563EB' },
+]
+
+export const USUARIOS_INICIALES = [
+  {
+    id: 'usr-2',
+    nombre: 'Diseñador Creativo',
+    email: 'diseno@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'disenador',
+  },
+  {
+    id: 'usr-3',
+    nombre: 'Jefe de Taller Producción',
+    email: 'produccion@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'produccion',
+  },
+  {
+    id: 'usr-4',
+    nombre: 'Encargado de Entregas',
+    email: 'entregas@sublimacionesroman.com',
+    telefono: '9372830402',
+    role: 'entregas',
+  },
+  {
+    id: 'usr-5',
+    nombre: 'Carlos Mendiburu',
+    email: 'carlos@ejemplo.com',
+    telefono: '9991234567',
+    role: 'cliente',
+  },
 ]
 
 export const CUELLOS_PLAYERA = ['Cuello Redondo', 'Cuello en V', 'Tipo Polo']
@@ -46,6 +77,12 @@ const VARIANTES_TERMO = [
 
 const VARIANTES_TAZA_MAGICA = [
   {
+    color: '#0D1B2A',
+    nombre: 'Azul marino',
+    image: tazaCeramicaAzulMarino,
+    zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
+  },
+  {
     color: '#000000',
     nombre: 'Negro',
     image: tazaMagicaNegra,
@@ -59,55 +96,6 @@ const VARIANTES_TAZA_CLASICA = [
     nombre: 'Blanco',
     image: tazaCeramicaBlanca,
     zona: { x: 0.341, y: 0.176, w: 0.329, h: 0.664, rotacion: 0 },
-  },
-  {
-    color: '#0D1B2A',
-    nombre: 'Azul marino',
-    image: tazaCeramicaAzulMarino,
-    zona: { x: 0.339, y: 0.191, w: 0.333, h: 0.647, rotacion: 0 },
-  },
-]
-
-export const USUARIOS_INICIALES = [
-  {
-    id: 'usr-1',
-    nombre: 'Administrador General',
-    email: 'admin@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'admin',
-    passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // 'admin123'
-  },
-  {
-    id: 'usr-2',
-    nombre: 'Diseñador Creativo',
-    email: 'diseno@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'disenador',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-3',
-    nombre: 'Jefe de Taller Producción',
-    email: 'produccion@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'produccion',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-4',
-    nombre: 'Encargado de Entregas',
-    email: 'entregas@sublimacionesroman.com',
-    telefono: '9372830402',
-    role: 'entregas',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
-  },
-  {
-    id: 'usr-5',
-    nombre: 'Carlos Mendiburu',
-    email: 'carlos@ejemplo.com',
-    telefono: '9991234567',
-    role: 'cliente',
-    passwordHash: '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
   },
 ]
 
@@ -125,7 +113,7 @@ export const PRODUCTOS_INICIALES = [
     type: 'taza',
     orientacionTexto: 'sigueZona',
     colors: VARIANTES_TAZA_MAGICA.map(variant => variant.color),
-    image: tazaMagicaNegra,
+    image: tazaCeramicaAzulMarino,
     efecto: 'sublimado',
     zonaPersonalizable: { x: 0.342, y: 0.174, w: 0.329, h: 0.664, rotacion: 0 },
     variantes: VARIANTES_TAZA_MAGICA,
@@ -160,13 +148,14 @@ export const PRODUCTOS_INICIALES = [
     badge: 'Popular',
     type: 'playera',
     orientacionTexto: 'sigueZona',
-    colors: COLORES_PLAYERA.map(color => color.hex),
-    image: playeraDryFit,
+    colors: VARIANTES_PLAYERA.map(variant => variant.color),
+    image: VARIANTES_PLAYERA[0].image,
     efecto: 'sublimado',
     zonaPersonalizable: {
       total: { x: 0.392, y: 0.147, w: 0.215, h: 0.736, rotacion: 0 },
       pecho: { x: 0.4, y: 0.22, w: 0.2, h: 0.2, rotacion: 0 },
     },
+    variantes: VARIANTES_PLAYERA,
   },
   {
     id: 'prod-gorra-01',

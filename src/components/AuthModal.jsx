@@ -1,24 +1,9 @@
 import { useState } from 'react'
 import { X, Lock, Mail, Phone, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react'
+import { crearPerfilUsuario } from '../services/autorizacion.js'
 import { USUARIOS_INICIALES } from '../services/datos.js'
 
-/**
- * Función utilitaria para hashear contraseñas con SHA-256 (nunca texto plano)
- */
-async function generarHashContrasena(contrasena) {
-  try {
-    const encoder = new TextEncoder()
-    const data = encoder.encode(contrasena)
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  } catch {
-    // Fallback simple si crypto.subtle no está disponible
-    return btoa(contrasena).split('').reverse().join('')
-  }
-}
-
-export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser }) {
+export default function AuthModal({ isOpen, onClose, onLoginExitoso }) {
   // ⚠️ Todos los hooks ANTES de cualquier return condicional (Rules of Hooks)
   const [modo, setModo] = useState('registro') // 'registro' | 'login'
 
@@ -96,49 +81,30 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
 
     if (!validarFormulario()) return
 
-    const hash = await generarHashContrasena(password)
+    const correo = email.trim().toLowerCase()
 
-    if (modo === 'registro') {
-      const nuevoUsuario = {
-        id: `usr-${Date.now()}`,
-        nombre: nombre.trim(),
-        email: email.trim().toLowerCase(),
-        telefono: telefono.trim(),
-        role: 'cliente',
-        passwordHash: hash, // Nunca guardamos texto plano
-        fechaRegistro: new Date().toISOString(),
-      }
+    const usuarioExistente = USUARIOS_INICIALES.find(
+      usuario => usuario.email.toLowerCase() === correo
+    )
+    const usuario = crearPerfilUsuario({
+      ...usuarioExistente,
+      email: correo,
+      nombre: modo === 'registro' ? nombre.trim() : usuarioExistente?.nombre,
+      telefono: modo === 'registro' ? telefono.trim() : usuarioExistente?.telefono,
+    })
 
-      setMensajeExito('¡Cuenta creada exitosamente! Bienvenido a Sublimaciones Román.')
-      setTimeout(() => {
-        onLoginExitoso(nuevoUsuario)
+    setMensajeExito(
+      modo === 'registro'
+        ? '¡Cuenta de demostración creada exitosamente!'
+        : '¡Sesión iniciada con éxito!'
+    )
+    setTimeout(
+      () => {
+        onLoginExitoso(usuario)
         onClose()
-      }, 1200)
-    } else {
-      // Modo login simulado
-      const usuarioExistente = USUARIOS_INICIALES.find(
-        u => u.email.toLowerCase() === email.trim().toLowerCase()
-      )
-
-      const usuarioLogueado = usuarioExistente
-        ? {
-            ...usuarioExistente,
-            passwordHash: hash,
-          }
-        : {
-            id: `usr-${Date.now()}`,
-            nombre: email.split('@')[0],
-            email: email.trim().toLowerCase(),
-            role: email.includes('admin') ? 'admin' : 'cliente',
-            passwordHash: hash,
-          }
-
-      setMensajeExito('¡Sesión iniciada con éxito!')
-      setTimeout(() => {
-        onLoginExitoso(usuarioLogueado)
-        onClose()
-      }, 1000)
-    }
+      },
+      modo === 'registro' ? 1200 : 1000
+    )
   }
 
   return (
@@ -168,6 +134,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               setModo('registro')
               setErrores({})
               setErrorGeneral('')
+              setMensajeExito('')
             }}
             className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'registro'
@@ -183,6 +150,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               setModo('login')
               setErrores({})
               setErrorGeneral('')
+              setMensajeExito('')
             }}
             className={`flex-1 py-3 font-headline text-xs font-bold uppercase tracking-wider transition-colors ${
               modo === 'login'
@@ -285,7 +253,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
               </label>
               <input
                 type="password"
-                placeholder="Mínimo 8 caracteres"
+                placeholder={modo === 'registro' ? 'Mínimo 8 caracteres' : 'Contraseña'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className={`w-full border bg-roman-stone ${
@@ -313,7 +281,7 @@ export default function AuthModal({ isOpen, onClose, onLoginExitoso, currentUser
             </div>
 
             <p className="pt-1 text-[10px] leading-tight text-slate-400">
-              🔒 Tus credenciales son protegidas con cifrado hash y nunca se guardan en texto plano.
+              Inicio de sesión simulado para esta práctica. No se guardan ni verifican credenciales.
             </p>
 
             {/* Botón de envío */}
